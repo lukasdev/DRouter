@@ -68,7 +68,6 @@ class App
         if ($callable instanceof \Closure) {
             $request = strtoupper($request);
             $this->uri[$request][] = $path;
-            #$this->routeConstraints[] = $request; //POST,GET
             $this->callables[$request][] = $callable->bindTo($this, __CLASS__);
             $this->lastRoutePath = $request;
         }
