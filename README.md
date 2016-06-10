@@ -48,7 +48,7 @@ $app->run();
 <p>No exemplo abaixo, são criadas duas rotas de exemplo. Na primeira um código
 executa um calculo que requer um parametro, parametro esse passado pela url</p>
 
-<p>Na segunda rota, o código da primeira rota é reutilizado usando o metodo DBRouter\App::getRouteCallable($routeName)</p>
+<p>Na segunda rota, o código da primeira rota é reutilizado usando o metodo DRouter\App::getRouteCallable($routeName)</p>
 
 ``` php
 $app = new DBRouter\App();
