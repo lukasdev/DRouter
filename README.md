@@ -28,6 +28,8 @@ $app = new DRouter\App();
 $app->route('/', 'GET', function(){
     echo 'Hello World';
 });
+
+$app->run();
 ```
 <h3>Roteamento com outros request, e nomenclatura de rotas</h3>
 
@@ -39,6 +41,7 @@ $app->route('/test', 'PUT', function(){
     echo 'Rota excutando em request PUT e nomeada!';
 })->setName('testPut');
 
+$app->run();
 ```
 
 <h3>Reutilizando códigos</h3>
@@ -69,6 +72,8 @@ $app->route('/test-put', 'PUT', function(){
     $valor2 = 9;
     $somatoria = $callable($meuValor, $valor2);
 });
+
+$app->run();
 ```
 
 ## Contribuições
