@@ -119,7 +119,7 @@ já possível fazer isso. veja os exemplos abaixo:</p>
     //saida --> Fazendo algo incrível, quadrado: [valorrecebido]
 ```
 
-<h3>Usando metodos de classes como challables</h3>
+<h3>Usando metodos de classes como callables</h3>
 ``` php
     class Chamavel
     {
