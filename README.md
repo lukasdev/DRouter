@@ -41,6 +41,11 @@ $app->route('/test', 'PUT', function(){
     echo 'Rota excutando em request PUT e nomeada!';
 })->setName('testPut');
 
+//exemplo de rota com request delete:
+$app->route('/post/:id', 'DELETE', function($id){
+    echo 'Deletando post do id '.$id;
+});
+
 $app->run();
 ```
 
