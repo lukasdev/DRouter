@@ -89,6 +89,57 @@ $app->route('/test-put', 'PUT', function(){
 $app->run();
 ```
 
+##Objetos e metodos de objetos como callables
+<p>Talvez você precise delegar o funcionamento de uma de suas rotas para um
+metodo de um objeto, ou até mesmo a um objeto como um todo. Agora (a partir de 11/06/2016)
+já possível fazer isso. veja os exemplos abaixo:</p>
+
+<h3>Objetos chamaveis (i.e com metodo magico __invoke) como callables</h3>
+
+``` php
+    class ExemploChamavel
+    {
+        public function __invoke($valor)
+        {
+            $valor = $valor*$valor;
+            $this->fazerAlgoIncrivel($valor);
+        }
+
+        private function fazerAlgoIncrivel($quadrado)
+        {
+            //varias linhas de código ...
+            echo 'Fazendo algo incrível, quadrado: '. $quadrado;
+        }
+    }
+
+    //utilização
+    $app = new DRouter\App();
+    $app->get('/calcular/:valor', new ExemploChamavel());
+
+    //saida --> Fazendo algo incrível, quadrado: [valorrecebido]
+```
+
+<h3>Usando metodos de classes como challables</h3>
+``` php
+    class Chamavel
+    {
+        private function fazerAlgoIncrivel($valor)
+        {
+            //varias linhas de código ...
+            echo 'Fazendo algo incrível, valor: '. $valor;
+        }
+    }
+
+    //utilização:
+    $app = new DRouter\App();
+    
+    //só como exemplo, estou usando request put... pode ser 
+    //qualquer um dos outros
+    $app->put('/valor/:valor', 'Chamavel:fazerAlgoIncrivel');
+
+    //saida --> Fazendo algo incrível, valor: [valorrecebido]
+```
+
 ## Contribuições
 
 Por favor veja [CONTRIBUTING](CONTRIBUTING.md) para detalhes.
