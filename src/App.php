@@ -69,7 +69,7 @@ class App
     *@param callable $callable
     *@return \DRouter\App
     */
-    public function route($path, $request, callable $callable)
+    public function route($path, $request, $callable)
     {
         $request = strtoupper($request);
 
@@ -77,13 +77,55 @@ class App
             throw new \InvalidArgumentException('Request inválido');
         }
 
-        if ($callable instanceof \Closure) {
+        if ($this->validCallable($callable)) {
             $this->uri[$request][] = $path;
-            $this->callables[$request][] = $callable->bindTo($this, __CLASS__);
+            
+            if ($callable instanceof \Closure) {
+                $this->callables[$request][] = $callable->bindTo($this, __CLASS__);
+            }else{
+                $this->callables[$request][] = $callable;
+            }
+            
             $this->lastRoutePath = $request;
+        } else {
+            throw new \InvalidArgumentException('O callable passado é inválido!');
         }
 
         return $this;
+    }
+
+    /**
+    * Verifica se um callable é valido o retorna caso seja
+    * @param callable $callable
+    * @return callable ou bolean
+    */
+    private function validCallable($callable)
+    {   
+        if (is_callable($callable)) {
+            return $callable;
+        } elseif (is_string($callable) && count(explode(':', $callable)) == 2){
+            $exp = explode(':', $callable);
+            $obj = filter_var($exp[0], FILTER_SANITIZE_STRING);
+            $obj = new $obj();
+            $method = filter_var($exp[1], FILTER_SANITIZE_STRING);
+
+            if (is_callable([$obj, $method])) {
+                return [$obj, $method];
+            } 
+        }
+
+        return false;
+    }
+
+    /**
+    * Executa um callable dentro dos padrões aceitos
+    * @param callable $callable
+    * @param array $params
+    */
+    private function executeCallable($callable, $params) {
+        if ($call = $this->validCallable($callable)) {
+            call_user_func_array($call, $params);
+        }        
     }
 
     /**
@@ -229,7 +271,8 @@ class App
         if ($rota == '/' && $homeIndice >= 0) {
             //chamar o callable do indice acima
             $callable = $this->callables[$request][$homeIndice];
-            $callable();
+            $this->executeCallable($callable,[]);
+
             $found = 1;
         } else {
             foreach ($this->uri[$request] as $i => $pattern) {
@@ -240,7 +283,7 @@ class App
                             if (preg_match("#$pattern#", $rota, $params)) {
                                 array_shift($params);
                                 
-                                call_user_func_array($this->callables[$request][$i], $params);
+                                $this->executeCallable($this->callables[$request][$i], $params);
                                 $found++;
                                 break;
                             }
