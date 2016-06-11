@@ -140,7 +140,7 @@ class App
         $requestType = strtoupper($metodo);
 
         if (in_array($requestType, array_keys($this->format))) {
-            if (count($args) == 2 && is_callable($args[1], true)) {
+            if (count($args) == 2) {
                 $path = strip_tags(trim($args[0]));
                 return $this->route($path, $requestType, $args[1]);
             }
@@ -268,12 +268,12 @@ class App
         $request = $this->getRequestType();
         $homeIndice = array_search('/', $this->uri[$request]);
 
-        if ($rota == '/' && $homeIndice >= 0) {
+        if ($rota == '/' && is_int($homeIndice) && $homeIndice >= 0) {
             //chamar o callable do indice acima
-            $callable = $this->callables[$request][$homeIndice];
-            $this->executeCallable($callable,[]);
-
-            $found = 1;
+            if ($callable = $this->callables[$request][$homeIndice]) {
+                $this->executeCallable($callable,[]);
+                $found = 1;
+            }
         } else {
             foreach ($this->uri[$request] as $i => $pattern) {
                 if ($pattern !== '/') {
