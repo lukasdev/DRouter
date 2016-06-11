@@ -139,6 +139,29 @@ já possível fazer isso. veja os exemplos abaixo:</p>
 
     //saida --> Fazendo algo incrível, valor: [valorrecebido]
 ```
+<h3>Injeção de dependencia usando Container</h3>
+<p>No código abaixo exemplificamos a criação de um usuário, através da injeção
+da dependencia \PDO no Container</p>
+
+``` php
+    $app = new DRouter\App();
+
+    $container = $app->getContainer();
+    $container->db = function(){
+        return new \PDO('mysql:host=localhost;dbname=meubanco', 'root', '');
+    };
+
+    $app->post('/user', function(){
+        $dados = $this->getParsedBody(); //dados do usuario
+        $banco = $this->container->db;
+
+        $stmt = $banco->prepare("INSERT INTO `usuarios` SET `nome` = ?, `email` = ?");
+        $stmt->execute([
+            $dados['nome'],
+            $dados['email']
+        ]);
+    });
+```
 
 ## Contribuições
 
