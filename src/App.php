@@ -210,6 +210,7 @@ class App
                                 
                                 call_user_func_array($this->callables[$request][$i], $params);
                                 $found++;
+                                break;
                             }
                         }
                     }
