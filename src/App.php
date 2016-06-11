@@ -248,8 +248,11 @@ class App
     public function getRouteCallable($routeName)
     {
         $routeIndex = array_search($routeName, $this->routeNames);
-        $split = explode(':', $routeIndex); //req:index
+        if (empty($routeIndex)) {
+            throw new \Exception('Nome da rota não encontrado!');
+        }
 
+        $split = explode(':', $routeIndex); //req:index  
         if ($this->callables[$split[0]][$split[1]]) {
             $routeCallable = $this->callables[$split[0]][$split[1]];
             return $routeCallable;
