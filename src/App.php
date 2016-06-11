@@ -95,6 +95,24 @@ class App
     }
 
     /**
+    * Retorna o corpo do request como um array
+    * @return array|void
+    */
+    public function getParsedBody()
+    {
+        if (!in_array($this->getRequestType(), ['GET', 'POST'])) {
+            $input_contents = file_get_contents("php://input");
+            parse_str($input_contents,$post_vars);
+
+            return $post_vars;
+        } elseif ($this->getRequestType() == 'POST') {
+            return $_POST;
+        } elseif ($this->getRequestType() == 'GET') {
+            return $_GET;
+        }
+    }
+
+    /**
     * Verifica se um callable é valido o retorna caso seja
     * @param callable $callable
     * @return callable ou bolean
