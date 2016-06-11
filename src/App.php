@@ -54,11 +54,19 @@ class App
     */
     protected $lastRoutePath;
 
-    public function __construct()
+    /**
+    * Objeto container
+    *@var object
+    */
+    public $container;
+
+    public function __construct($params = array())
     {  
         $this->uri = $this->format;
         $this->callables = $this->format;
         $this->routeNames = array();
+
+        $this->container = new Container($params);
     }
 
     /**
@@ -110,6 +118,15 @@ class App
         } elseif ($this->getRequestType() == 'GET') {
             return $_GET;
         }
+    }
+
+    /*
+    * Retorna o objeto container
+    * @return \DRouter\Container;
+    */
+    public function getContainer()
+    {
+        return $this->container;
     }
 
     /**
