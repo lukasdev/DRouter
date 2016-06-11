@@ -34,7 +34,7 @@ $app->run();
 <h3>Roteamento com outros request, e nomenclatura de rotas</h3>
 
 ``` php
-$app = new DBRouter\App();
+$app = new DRouter\App();
 
 //rota com PUT
 $app->route('/test', 'PUT', function(){
@@ -56,7 +56,7 @@ executa um calculo que requer um parametro, parametro esse passado pela url</p>
 <p>Na segunda rota, o código da primeira rota é reutilizado usando o metodo DRouter\App::getRouteCallable($routeName)</p>
 
 ``` php
-$app = new DBRouter\App();
+$app = new DRouter\App();
 //As rotas podem ser executadas sob Requests diferentes, como no exemplo abaixo:
 
 $app->route('/test/:val1/:val2/', 'GET', function($val1, $val2){
