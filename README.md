@@ -123,7 +123,7 @@ já possível fazer isso. veja os exemplos abaixo:</p>
 ``` php
     class Chamavel
     {
-        private function fazerAlgoIncrivel($valor)
+        public function fazerAlgoIncrivel($valor)
         {
             //varias linhas de código ...
             echo 'Fazendo algo incrível, valor: '. $valor;
