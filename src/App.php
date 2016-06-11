@@ -14,6 +14,18 @@ namespace DRouter;
 class App
 {
     /**
+    * Requests permitidos
+    *@var array
+    */
+    protected $format = [
+        'GET' => [],
+        'POST' => [],
+        'PUT' => [],
+        'DELETE' => [],
+        'OPTIONS' => []
+    ];
+
+    /**
     * Contém um conjunto de arrays identificados pelo tipo de request
     * e um array de rotas definidas
     *@var array
@@ -44,14 +56,8 @@ class App
 
     public function __construct()
     {  
-        $format = [
-            'GET' => [],
-            'POST' => [],
-            'PUT' => [],
-            'DELETE' => []
-        ];
-        $this->uri = $format;
-        $this->callables = $format;
+        $this->uri = $this->format;
+        $this->callables = $this->format;
         $this->routeNames = array();
     }
 
@@ -65,14 +71,40 @@ class App
     */
     public function route($path, $request, callable $callable)
     {
+        $request = strtoupper($request);
+
+        if (!in_array($request, array_keys($this->format))) {
+            throw new \InvalidArgumentException('Request inválido');
+        }
+
         if ($callable instanceof \Closure) {
-            $request = strtoupper($request);
             $this->uri[$request][] = $path;
             $this->callables[$request][] = $callable->bindTo($this, __CLASS__);
             $this->lastRoutePath = $request;
         }
 
         return $this;
+    }
+
+    /**
+    * Permite a definição de rotas através de metodos especificos tais como:
+    * get, post, put, delete, options
+    * @param $method string nome do metodo chamado
+    * @param $args array de argumentos
+    */
+    public function __call($method, $args)
+    {
+        $metodo = trim($method);
+        $requestType = strtoupper($metodo);
+
+        if (in_array($requestType, array_keys($this->format))) {
+            if (count($args) == 2 && is_callable($args[1], true)) {
+                $path = strip_tags(trim($args[0]));
+                return $this->route($path, $requestType, $args[1]);
+            }
+        } else {
+            throw new \InvalidArgumentException('Request inválido');
+        }
     }
 
     /**
