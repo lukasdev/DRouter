@@ -29,6 +29,11 @@ $app->route('/', 'GET', function(){
     echo 'Hello World';
 });
 
+//a função criada acima também pode ser abreviada em:
+$app->get('/', function(){
+    echo 'Hello World';
+});
+
 $app->run();
 ```
 <h3>Roteamento com outros request, e nomenclatura de rotas</h3>
@@ -40,6 +45,9 @@ $app = new DRouter\App();
 $app->route('/test', 'PUT', function(){
     echo 'Rota excutando em request PUT e nomeada!';
 })->setName('testPut');
+
+//neste caso $app->put('/test', function(...){...}); também funcionaria
+//bem como qualquer outro dos requests ->put, ->delete, ->get, ->options ...
 
 //exemplo de rota com request delete:
 $app->route('/post/:id', 'DELETE', function($id){
