@@ -185,6 +185,15 @@ class App
     }
 
     /**
+    * Retorna uma dependencia injetada no container
+    */
+    public function __get($key){
+        if ($this->container->{$key}) {
+            return $this->container->{$key};
+        }
+    }
+
+    /**
     * Define o nome de uma dada rota recém criada
     *@param string $routeName
     *@return void

@@ -19,6 +19,11 @@
             $this->data = $params;
         }
 
+        public function getData()
+        {
+            return $this->data;
+        }
+
         public function __set($key, $val)
         {
             $this->data[$key] = $val;
