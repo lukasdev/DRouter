@@ -59,6 +59,10 @@ class App
     *@var object
     */
     public $container;
+    /**
+    * Objeto helper Render
+    */
+    public $render;
 
     public function __construct($params = array())
     {  
@@ -67,6 +71,7 @@ class App
         $this->routeNames = array();
 
         $this->container = new Container($params);
+        $this->render = new Render();
     }
 
     /**
@@ -290,7 +295,10 @@ class App
     {
         return $_SERVER['REQUEST_METHOD'];
     }
-
+    /**
+    * Exibe o content Type atual do request
+    * @return string
+    */
     protected function getContentType()
     {
         return (isset($_SERVER['CONTENT_TYPE'])) ? $_SERVER['CONTENT_TYPE'] : null;
