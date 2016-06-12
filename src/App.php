@@ -109,10 +109,14 @@ class App
     public function getParsedBody()
     {
         if (!in_array($this->getRequestType(), ['GET', 'POST'])) {
-            $input_contents = file_get_contents("php://input");
-            parse_str($input_contents,$post_vars);
+            if ($this->getContentType() == 'application/x-www-form-urlencoded') {
+                $input_contents = file_get_contents("php://input");
+                parse_str($input_contents,$post_vars);
 
-            return $post_vars;
+                return $post_vars;
+            } else {
+                throw new \UnexpectedValueException('Content-type não aceito');
+            }
         } elseif ($this->getRequestType() == 'POST') {
             return $_POST;
         } elseif ($this->getRequestType() == 'GET') {
@@ -159,6 +163,9 @@ class App
     */
     private function executeCallable($callable, $params) {
         if ($call = $this->validCallable($callable)) {
+            if (is_array($call) || is_object($call)) {
+                $params[] = $this;
+            }
             call_user_func_array($call, $params);
         }        
     }
@@ -282,6 +289,11 @@ class App
     protected function getRequestType()
     {
         return $_SERVER['REQUEST_METHOD'];
+    }
+
+    protected function getContentType()
+    {
+        return (isset($_SERVER['CONTENT_TYPE'])) ? $_SERVER['CONTENT_TYPE'] : null;
     }
 
     /**
