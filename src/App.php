@@ -330,7 +330,13 @@ class App
     */
     public function run()
     {
-        $rota = (!isset($_SERVER['PATH_INFO'])) ? '/' : strip_tags(trim($_SERVER['PATH_INFO']));
+        if (isset($_SERVER['ORIG_PATH_INFO'])) {
+            $pathInfo = $_SERVER['ORIG_PATH_INFO'];
+        } elseif (isset($_SERVER['PATH_INFO'])) {
+            $pathInfo = $_SERVER['PATH_INFO'];
+        }
+
+        $rota = (!isset($pathInfo)) ? '/' : strip_tags(trim($pathInfo));
         $found = 0;
         $request = $this->getRequestType();
         $homeIndice = array_search('/', $this->uri[$request]);
