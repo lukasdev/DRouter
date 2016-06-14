@@ -63,6 +63,7 @@ class App
     * Objeto helper Render
     */
     public $render;
+    protected $notFoundModified = false;
 
     public function __construct($params = array())
     {  
@@ -324,6 +325,18 @@ class App
         return false;
     }
 
+    public function notFound(){
+        $args = func_get_args();
+
+        if(count($args) == 1 && is_callable($args[0])) {
+            $fnc = $args[0];
+
+            if ($fnc instanceof \Closure) {           
+                $this->notFoundModified = $fnc;
+            }
+        }
+    }
+
     /**
     * Verifica e executa o dispatch das rotas criadas
     *@return void
@@ -367,8 +380,14 @@ class App
         }
 
         if ($found == 0) {
-            echo 'Pagina não encontrada!';
+            if ($this->notFoundModified) {
+                $fnc = $this->notFoundModified->bindTo($this, __CLASS__);
+                $this->executeCallable($fnc, []);                
+            } else {
+                $this->render->renderNotFoundPage();
+            }
         }
+
     }
     /*Mic drop...*/
 }
