@@ -4,8 +4,7 @@ Um sistema simplista de roteamento, com o intuito de ser utilizado em aplicaçõ
 web pequenas e webservices REST.
 
 ## Instalação
-
-Clone o repositório e execute
+via composer
 
 ``` bash
 $ composer require lukasdev/drouter
