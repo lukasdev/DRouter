@@ -30,6 +30,13 @@
         }
 
         public function __get($key){
-            return $this->data[$key];
+            if ($this->data[$key]) {
+                if ($this->data[$key] instanceof \Closure) {
+                    $fnc = $this->data[$key];
+                    return $fnc();
+                } else {
+                    return $this->data[$key];
+                }
+            }
         }
     }
