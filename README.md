@@ -155,7 +155,7 @@ da dependencia \PDO no Container</p>
         $dados = $this->getParsedBody(); //dados do usuario
         $banco = $this->container->db;
 
-        $stmt = $banco()->prepare("INSERT INTO `usuarios` SET `nome` = ?, `email` = ?");
+        $stmt = $banco->prepare("INSERT INTO `usuarios` SET `nome` = ?, `email` = ?");
         $stmt->execute([
             $dados['nome'],
             $dados['email']
