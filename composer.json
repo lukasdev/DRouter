@@ -2,6 +2,7 @@
     "name": "lukasdev/drouter",
     "description": "Um sistema simplista de roteamento, com o intuito de ser utilizado em aplicacoes web pequenas e webservices REST",
     "keywords": ["router", "REST", "microframework", "api"],
+    "homepage": "https://github.com/lukasdev/DRouter",
     "license": "MIT",
     "authors": [
         {
