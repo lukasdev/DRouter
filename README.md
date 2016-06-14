@@ -8,7 +8,7 @@ web pequenas e webservices REST.
 Clone o repositório e execute
 
 ``` bash
-$ composer dump-autoload -o
+$ composer require lukasdev/drouter
 ```
 
 ## Utilização
