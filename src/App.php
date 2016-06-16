@@ -63,8 +63,22 @@ class App
     * Objeto helper Render
     */
     public $render;
+    /**
+    * Guarda modificação da pagina de notFound caso exista
+    * @var bolean|\Closure
+    */
     protected $notFoundModified = false;
+    /**
+    * Array de rotas encontradas para posterior verificação de similaridades
+    * com o path atual
+    *@var array
+    */
     protected $foundRoutes = array();
+    /**
+    * Guarda os parametros a serem passados para a rota identificando a mesma
+    * por um index 
+    *@var array
+    */
     protected $paramsDispatch = array();
 
     public function __construct($params = array())
@@ -338,7 +352,14 @@ class App
             }
         }
     }
-
+    /**
+    * Dado um array com um conjunto de rotas encontradas para um dado path
+    * executa uma comparação entre rotas com maior similaridade para ser executada
+    * e retorna seu indice
+    *@param array $arrayRoutes
+    *@param string $currentPath
+    *@return bolean|int
+    */
     public function findBySimilarity($arrayRoutes, $currentPath){
         if (count($arrayRoutes) == 0){
             return false;
