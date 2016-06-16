@@ -64,6 +64,8 @@ class App
     */
     public $render;
     protected $notFoundModified = false;
+    protected $foundRoutes = array();
+    protected $paramsDispatch = array();
 
     public function __construct($params = array())
     {  
@@ -337,6 +339,35 @@ class App
         }
     }
 
+    public function findBySimilarity($arrayRoutes, $currentPath){
+        if (count($arrayRoutes) == 0){
+            return false;
+        } elseif (count($arrayRoutes) == 1) {
+            foreach ($arrayRoutes as $i => $path) {
+                return $i;
+                break;
+            }
+        }
+
+        $currentPath = explode('/', $currentPath);
+        $similarities = $arrayRoutes;
+
+        foreach ($arrayRoutes as $index => $path) {
+            $breakRoute = explode('/', $path);
+            $nSimilarities = 0;
+            foreach ($breakRoute as $i => $val) {
+                if($val == $currentPath[$i])
+                    $nSimilarities++;
+            }
+
+            $similarities[$index] = $nSimilarities;
+        }
+        $bigger = max(array_values($similarities));
+        $mostSimilar = array_search($bigger, $similarities);
+        
+        return $mostSimilar;
+    }
+
     /**
     * Verifica e executa o dispatch das rotas criadas
     *@return void
@@ -369,13 +400,18 @@ class App
                             if (preg_match("#$pattern#", $rota, $params)) {
                                 array_shift($params);
                                 
-                                $this->executeCallable($this->callables[$request][$i], $params);
                                 $found++;
-                                break;
+                                $this->paramsDispatch[$i] = $params;
+                                $this->foundRoutes[$i] = $pattern;
                             }
                         }
                     }
                 }
+            }
+            $dispatch = $this->findBySimilarity($this->foundRoutes, $rota);
+            if ($dispatch !== false) {
+                $parametros = $this->paramsDispatch[$dispatch];
+                $this->executeCallable($this->callables[$request][$dispatch], $parametros);
             }
         }
 
