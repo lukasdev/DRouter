@@ -80,6 +80,7 @@ class App
     *@var array
     */
     protected $paramsDispatch = array();
+    protected $routePrefix = null;
 
     public function __construct($params = array())
     {  
@@ -108,6 +109,10 @@ class App
         }
 
         if ($this->validCallable($callable)) {
+            if (!is_null($this->routePrefix)) {
+                $path = $this->routePrefix.$path;
+            }
+
             $this->uri[$request][] = $path;
             
             if ($callable instanceof \Closure) {
@@ -122,6 +127,55 @@ class App
         }
 
         return $this;
+    }
+
+    public function group($prefix, callable $fnc)
+    {
+        $this->routePrefix = $prefix;
+
+        if ($fnc instanceof \Closure) {
+            $fnc = $fnc->bindTo($this, __CLASS__);
+            $fnc();
+        } else {
+            $fnc();
+        }
+
+        $this->routePrefix = null;
+    }
+
+    public function pathFor($routeName, $varSwap = array())
+    {
+        $base = substr(explode('index.php', $_SERVER['SCRIPT_NAME'])[0],0,-1);
+
+        $index = array_search($routeName, $this->routeNames);
+        $exp = explode(':', $index);
+        $path = $this->uri[$exp[0]][$exp[1]];
+
+        $routeVariables = $this->getRouteVariables($path);
+        $expected = count($routeVariables);
+        if ($expected > 0) {
+            if($expected != count($varSwap)) {
+                throw new \InvalidArgumentException('São experados '.$expected.' parametros para a rota');
+            } else {
+                $pathExp = explode('/', $path);
+                $pathReturn = '';
+                $arrayVariablesSwap = array_keys($varSwap);
+
+                foreach ($pathExp as $i => $pattern) {
+                    $pattern = str_replace(':', '', $pattern);
+                    if (in_array($pattern, $arrayVariablesSwap)) {
+                        $pathReturn .= $varSwap[$pattern];
+                    } else {
+                        $pathReturn .= $pattern;
+                    }
+                    $pathReturn .= '/';
+                }
+
+                return $base.substr($pathReturn,0,-1);
+            }
+        } else {
+            return $base.$path;
+        }
     }
 
     /**
@@ -259,6 +313,17 @@ class App
         return $p;
     }
 
+    protected function getRouteVariables($path){
+        $exp = explode('/', $path);
+        $return = [];
+        foreach ($exp as $i => $pattern) {
+            if (preg_match('/^[\:]/i', $pattern)) {
+                $return[$i] = str_replace(':', '', $pattern);
+            }
+        }
+
+        return $return;
+    }
     /**
     * Encontra as partes "não-variaveis" de um padrão de uma dada rota
     *@param string $pattern
