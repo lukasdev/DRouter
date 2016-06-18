@@ -239,7 +239,7 @@ class App
     */
     private function executeCallable($callable, $params) {
         if ($call = $this->validCallable($callable)) {
-            if (is_array($call) || is_object($call)) {
+            if (is_array($call) || is_object($call) || function_exists($call)) {
                 $params[] = $this;
             }
             call_user_func_array($call, $params);
