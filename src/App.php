@@ -221,7 +221,7 @@ class App
         } elseif (is_string($callable) && count(explode(':', $callable)) == 2){
             $exp = explode(':', $callable);
             $obj = filter_var($exp[0], FILTER_SANITIZE_STRING);
-            $obj = new $obj();
+            $obj = new $obj($this);
             $method = filter_var($exp[1], FILTER_SANITIZE_STRING);
 
             if (is_callable([$obj, $method])) {
@@ -239,7 +239,7 @@ class App
     */
     private function executeCallable($callable, $params) {
         if ($call = $this->validCallable($callable)) {
-            if (is_array($call) || is_object($call) || function_exists($call)) {
+            if (is_object($call) || function_exists($call)) {
                 $params[] = $this;
             }
             call_user_func_array($call, $params);
