@@ -80,6 +80,11 @@ class App
     *@var array
     */
     protected $paramsDispatch = array();
+
+    /**
+    * Ultimo prefixo de grupo criado
+    * @var string|null
+    */
     protected $routePrefix = null;
 
     public function __construct($params = array())
@@ -102,6 +107,7 @@ class App
     */
     public function route($path, $request, $callable)
     {
+        $path = $this->validatePath($path);
         $request = strtoupper($request);
 
         if (!in_array($request, array_keys($this->format))) {
@@ -129,6 +135,24 @@ class App
         return $this;
     }
 
+    /**
+    * Valida um path retirando sua ultima barra, caso exista!
+    * @param string $path
+    * @return string
+    */
+    private function validatePath($path){
+        $last = strlen($path)-1;
+        if ($path[$last] == '/') {
+            $path = substr($path,0,-1);
+        }
+
+        return $path;
+    }
+    /**
+    * Define um grupo de rotas dentro de seu closure
+    * @param string $prefix - Prefixo das rotas
+    * @param \Closure $fnc - Função que define as rotas
+    */
     public function group($prefix, callable $fnc)
     {
         $this->routePrefix = $prefix;
@@ -137,17 +161,21 @@ class App
             $fnc = $fnc->bindTo($this, __CLASS__);
             $fnc();
         } else {
-            $fnc();
+            throw new \InvalidArgumentException('Callable do metodo group DEVE ser um Closure');
         }
 
         $this->routePrefix = null;
     }
-
+    /**
+    * Encontra o path de uma rota pelo seu nome
+    * @param string $routeName
+    * @param array $varSwap - Variaveis para trocar na path
+    */
     public function pathFor($routeName, $varSwap = array())
     {
         $base = substr(explode('index.php', $_SERVER['SCRIPT_NAME'])[0],0,-1);
 
-        $index = array_search($routeName, $this->routeNames);
+        $index = $this->getRouteIndex($routeName);
         $exp = explode(':', $index);
         $path = $this->uri[$exp[0]][$exp[1]];
 
@@ -288,6 +316,16 @@ class App
         $this->routeNames[$req.':'.$lastRoute] = $routeName;
     }
 
+    protected function getRouteIndex($routeName)
+    {
+        $index = array_search($routeName, $this->routeNames);
+        if ($index == false) {
+            throw new \Exception('A rota '.$routeName.' não existe!');
+        }
+
+        return $index;
+    }
+
     /**
     * substitui as variaveis em uma dada rota por um padrão de expressão
     * regular para verificação interna e dispatch de rotas
@@ -393,7 +431,7 @@ class App
     */
     public function getRouteCallable($routeName)
     {
-        $routeIndex = array_search($routeName, $this->routeNames);
+        $routeIndex = $this->getRouteIndex($routeName);
         if (empty($routeIndex)) {
             throw new \Exception('Nome da rota não encontrado!');
         }
@@ -406,6 +444,9 @@ class App
         return false;
     }
 
+    /**
+    * Define a pagina notFound usando um closure
+    */
     public function notFound(){
         $args = func_get_args();
 
@@ -467,6 +508,8 @@ class App
         }
 
         $rota = (!isset($pathInfo)) ? '/' : strip_tags(trim($pathInfo));
+        $rota = $this->validatePath($rota);
+
         $found = 0;
         $request = $this->getRequestType();
         $homeIndice = array_search('/', $this->uri[$request]);
