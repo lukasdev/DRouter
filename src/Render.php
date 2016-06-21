@@ -20,13 +20,40 @@
         *@var $viewsFolder string
         */
         protected $viewsFolder;
+        
+        /**
+        * Array de variaveis globais as views!
+        * @var array $globals
+        */
+        protected $globals;
 
         public function __construct()
         {
             $this->setStatusCode(200);
             $this->setContentType('text/html');
         }
+        /**
+        * Define variaveis que serão globais para qualquer view
+        * no momento do extract
+        * @param array $data
+        */
+        public function setAsGlobal(array $data)
+        {
+            if (!empty($this->getGlobals())) {
+                $data = array_merge($this->getGlobals(), $data);
+            }
 
+            $this->globals = $data;
+        }
+
+        /**
+        * Retorna o array de globais
+        * @return array
+        */
+        public function getGlobals()
+        {
+            return $this->globals;
+        }
         /**
         * Seta a pasta de viewss
         *@param string $viewsFolder
@@ -83,6 +110,7 @@
 
             header('HTTP/1.1 '.$this->getStatusCode());
             header('Content-type: '.$this->getContentType().';charset=utf8');
+            $data = array_merge($data, $this->getGlobals());
 
             extract($data);
             if (file_exists($this->viewsFolder.$fileName)) {
