@@ -39,8 +39,9 @@
         */
         public function setAsGlobal(array $data)
         {
-            if (!empty($this->getGlobals())) {
-                $data = array_merge($this->getGlobals(), $data);
+            $glob = $this->getGlobals();
+            if (!empty($glob)) {
+                $data = array_merge($glob, $data);
             }
 
             $this->globals = $data;
