@@ -205,6 +205,14 @@ class App
             return $base.$path;
         }
     }
+    /**
+    * Redireciona para uma rota pelo seu name!
+    * @param string $name
+    */
+    public function redirectTo($name)
+    {
+        header("Location: ".$this->pathFor($name));
+    }
 
     /**
     * Retorna o corpo do request como um array
