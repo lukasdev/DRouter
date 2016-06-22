@@ -11,9 +11,6 @@
  */
 namespace DRouter;
 
-use DRouter\Request;
-use DRouter\Router;
-
 class App
 {
     protected $router;
