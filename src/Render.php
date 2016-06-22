@@ -4,18 +4,6 @@
     class Render
     {
         /**
-        * O tipo de conteudo carregado na view
-        *@var $contentType string
-        */
-        protected $contentType;
-
-        /**
-        * O código de status do response
-        *@var $statusCode int
-        */
-        protected $statusCode;
-
-        /**
         * O caminho até a pasta de views
         *@var $viewsFolder string
         */
@@ -25,13 +13,8 @@
         * Array de variaveis globais as views!
         * @var array $globals
         */
-        protected $globals;
+        protected $globals = array();
 
-        public function __construct()
-        {
-            $this->setStatusCode(200);
-            $this->setContentType('text/html');
-        }
         /**
         * Define variaveis que serão globais para qualquer view
         * no momento do extract
@@ -65,40 +48,6 @@
         }
 
         /**
-        * Seta o content type
-        *@param string $contentType
-        */
-        public function setContentType($contentType)
-        {
-            $this->contentType = $contentType;
-        }
-
-        /**
-        * Retorna o content type definido
-        */
-        public function getContentType()
-        {
-            return $this->contentType;
-        }
-
-        /**
-        * Seta o status do response
-        *@param int $code
-        */
-        public function setStatusCode($code)
-        {
-            $this->statusCode = $code;
-        }
-
-        /**
-        * Retorna o código de status do response
-        */
-        public function getStatusCode()
-        {
-            return $this->statusCode;
-        }
-
-        /**
         * Carrega uma view e injeta valores
         *@param string $fileName
         *@param array $data
@@ -109,8 +58,6 @@
                 throw new \Exception('A pasta de views não foi definida!');
             }
 
-            header('HTTP/1.1 '.$this->getStatusCode());
-            header('Content-type: '.$this->getContentType().';charset=utf8');
             $data = array_merge($data, $this->getGlobals());
 
             extract($data);

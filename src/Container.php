@@ -13,7 +13,7 @@
         private function setData(array $params)
         {
             if (!is_array($params)) {
-                throw new \InvalidArgumentException('Dados do container inválidos');
+                throw new \InvalidArgumentException('Dados do container deve ser um array');
             }
 
             $this->data = $params;
