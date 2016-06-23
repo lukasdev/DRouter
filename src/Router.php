@@ -1,10 +1,27 @@
 <?php
+/**
+ * Router
+ * Objeto responsavel por definir e despachar rotas sob uma determinada url
+ *
+ * @author      Lucas Silva <dev.lucassilva@gmail.com>
+ * @copyright   2016 Lucas Silva
+ * @link        http://www.downsmaster.com
+ * @version     2.0.0
+ *
+ * MIT LICENSE
+ */
+
 namespace DRouter;
+
 use DRouter\Request;
 use DRouter\Route;
 
 class Router
 {
+    /**
+    * Array que define os metodos aceitos e guarda suas respectivas rotas
+    * @var $routes array
+    */
     protected $routes = array(
         'GET' => array(),
         'POST' => array(),
@@ -12,10 +29,34 @@ class Router
         'DELETE' => array()
     );
 
+    /**
+    * Objeto DRouter\Request
+    * @var $request Request
+    */
     protected $request;
+
+    /**
+    * Objeto DRouter\Route - Rota a ser despachada
+    * @var $machedRoute Route
+    */
     protected $matchedRoute;
+
+    /**
+    * Prefixo do grupo de rota
+    * @var $routePrefix null|string
+    */
     protected $routePrefix = null;
+
+    /**
+    * Array de nomenclatura de rotas no formato [METHOD:index] = name
+    * @var $routeNames array
+    */
     protected $routeNames = array();
+
+    /**
+    * Ultimo metodo utilizado em uma rota
+    * @var $lastRouteMethod null|string
+    */
     protected $lastRouteMethod = null;
 
     public function __construct(Request $request)
@@ -23,6 +64,11 @@ class Router
         $this->request = $request;
     }
 
+    /**
+    * Valida os paths das rotas, retirando a ultima barra caso exista
+    * para evitar conflitos no dispatch
+    * @param $path string
+    */
     private function validatePath($path){
         $last = strlen($path)-1;
         if ($path[$last] == '/') {
@@ -31,6 +77,13 @@ class Router
         return $path;
     }
 
+    /**
+    * Define uma rota sob um metodo criando sua representação no objeto Route
+    * @param $method string
+    * @param $pattern string
+    * @param $callable callable
+    * @param $conditions null|array
+    */
     public function route($method, $pattern, $callable, $conditions)
     {
         $method = strtoupper($method);
@@ -44,6 +97,11 @@ class Router
         return $this;
     }
 
+    /**
+    * Define o prefixo para agrupamento das rotas
+    * @param $prefix string
+    * @param $fnc callable Closure
+    */
     public function group($prefix, $fnc)
     {
         $this->routePrefix = $prefix;
@@ -55,6 +113,10 @@ class Router
         $this->routePrefix = null;
     }
 
+    /**
+    * Define o nome de uma rota recem criada
+    * @param $routeName string
+    */
     public function setName($routeName)
     {
         $lastMethod = $this->lastRouteMethod;
@@ -63,6 +125,11 @@ class Router
         $this->routeNames[$indexName] = $routeName;
     }
 
+    /**
+    * Encontra uma rota pelo seu nome dentro do array de rotas
+    * @param $routeName string
+    * @return DRouter\Route
+    */
     protected function getRoute($routeName)
     {
         $routeIndex = array_search($routeName, $this->routeNames);
@@ -76,12 +143,24 @@ class Router
         }
     }
 
+    /**
+    * Retorna o callable de uma rota pelo seu nome
+    * @param $routeName
+    * @return callable
+    */
     public function getRouteCallable($routeName)
     {
         $route = $this->getRoute($routeName);
         return $route->getCallable();
     }
 
+    /**
+    * Retorna o path até uma rota nomeada, trocando seus parametros
+    * caso necessário
+    * @param $routeName string
+    * @param $params array
+    * @return string
+    */
     public function pathFor($routeName, $params = array())
     {
         if ($rota = $this->getRoute($routeName)){
@@ -96,11 +175,20 @@ class Router
         }
     }
 
+    /**
+    * Retorna array com tipos de requests aceitos pelo roteamento
+    * @return array
+    */
     public function getRequestAccepted()
     {
         return array_keys($this->routes);
     }
 
+    /**
+    * Pelo request method atual, navega pelas rotas definidas
+    * E encontra a rota que coincidir com o padrão do RequestUri atual
+    * @return bolean
+    */
     public function dispatch()
     {
         foreach ($this->routes[$this->request->getMethod()] as $rota) {
@@ -112,13 +200,24 @@ class Router
                 break;
             }
         }
+
+        return false;
     }
 
+    /**
+    * Retorna a rota que coincidiu com a RequestUri atual
+    * @return DRouter\Route
+    */
     public function getMatchedRoute()
     {
         return $this->matchedRoute;
     }
 
+    /**
+    * Executa callable da rota que coincidiu
+    * passando como ultimo prametro o objeto container, caso necessário
+    * @param $container DRouter\Container
+    */
     public function execute(\Drouter\Container $container) {
         $rota = $this->getMatchedRoute();
         $callable = $rota->getCallable();

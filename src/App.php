@@ -13,10 +13,34 @@ namespace DRouter;
 
 class App
 {
+    /**
+    * Objeto \DRouter\Router
+    *@var $router Router
+    */
     protected $router;
+
+    /**
+    * Objeto \DRouter\Request
+    *@var $request Request
+    */
     protected $request;
+
+    /**
+    * Objeto DRouter\Container
+    * @var $container Container
+    */
     protected $container;
+
+    /**
+    * Objeto \DRouter\Render
+    *@var $render Render
+    */
     public $render;
+
+    /**
+    * Pagina notFound modificada
+    *@var $notFoundModified false|callable
+    */
     protected $notFoundModified = false;
 
     public function __construct($paramsContainer = array())
@@ -34,11 +58,18 @@ class App
         $this->container = new Container($params);        
     }
 
+    /**
+    * @return \DRouter\Container
+    */
     public function getContainer()
     {
         return $this->container;
     }
 
+    /**
+    * Recebe um callable e retorna sua referencia de acordo
+    * @return callable
+    */
     private function validCallable($callable)
     {
         if (is_callable($callable)) {
@@ -58,6 +89,9 @@ class App
         return false;
     }
 
+    /**
+    * Emula metodos get, post, put, delete e group do objeto Router
+    */
     public function __call($method, $args)
     {
         $methodUpper = strtoupper($method);
@@ -79,18 +113,23 @@ class App
         }
     }
 
-    public function notFound()
+    /**
+    * Define uma pagina notfoud
+    * @param callable $fnc
+    */
+    public function notFound(callable $fnc)
     {
-        $args = func_get_args();
-        if(count($args) == 1 && is_callable($args[0])) {
-            $fnc = $args[0];
+        if(is_callable($fnc)) {
             if ($fnc instanceof \Closure) {           
                 $this->notFoundModified = $fnc;
             }
         }
     }
 
-
+    /**
+    * Da inicio a App. Executando as rotas criadas, renderizando uma pagina 404
+    * ou exibindo a mensagem de uma exceção que tenha sido lançada
+    */
     public function run()
     {
         try {
