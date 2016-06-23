@@ -12,23 +12,12 @@ $ composer require lukasdev/drouter
 
 ## Utilização
 
-<p>Esta classe proporciona a criação de rotas para os principais requests REST;
-conta ainda coma possibilidade de nomenclatura de rotas criadas bem como a 
-reutilização de códigos previamente criados em rotas.
-Abaixo alguns exemplos.</p>
-
 <h3>Iniciando uma instancia e criando uma rota</h3>
 
 ``` php
 $app = new DRouter\App();
 
 //Rota com request GET:
-
-$app->route('/', 'GET', function(){
-    echo 'Hello World';
-});
-
-//a função criada acima também pode ser abreviada em:
 $app->get('/', function(){
     echo 'Hello World';
 });
