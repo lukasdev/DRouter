@@ -34,6 +34,11 @@ class App
         $this->container = new Container($params);        
     }
 
+    public function getContainer()
+    {
+        return $this->container;
+    }
+
     private function validCallable($callable)
     {
         if (is_callable($callable)) {
