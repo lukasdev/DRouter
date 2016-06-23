@@ -5,7 +5,7 @@
  * @author      Lucas Silva <dev.lucassilva@gmail.com>
  * @copyright   2016 Lucas Silva
  * @link        http://www.downsmaster.com
- * @version     1.0.0
+ * @version     2.0.0
  *
  * MIT LICENSE
  */
