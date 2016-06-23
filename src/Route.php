@@ -76,6 +76,11 @@ class Route
         return $this->pattern;
     }
 
+    public function getParamNames()
+    {
+        preg_match_all('@:([\w]+)@', $this->pattern, $paramNames, PREG_PATTERN_ORDER);
+        return $paramNames[0];
+    }
     /**
     * Verifica se o padrão da rota coincide com o padrão escrito na
     * url da aplicação, e guarda os parametros encontrados sob suas
@@ -84,9 +89,8 @@ class Route
     * @return bolean
     */
     public function match($resourceUri)
-    {        
-        preg_match_all('@:([\w]+)@', $this->pattern, $paramNames, PREG_PATTERN_ORDER);
-        $paramNames = $paramNames[0];
+    {
+        $paramNames = $this->getParamNames();
 
         $patternAsRegex = preg_replace_callback('@:[\w]+@', [$this, 'convertToRegex'], $this->pattern);
         if ( substr($this->pattern, -1) === '/' ) {

@@ -165,6 +165,11 @@ class Router
     {
         if ($rota = $this->getRoute($routeName)){
             $pattern = $rota->getPattern();
+            $qtdParams = count($rota->getParamNames());
+            
+            if ($qtdParams > 0 && count($params) == 0) {
+                throw new \RuntimeException('A rota '.$routeName.' requer '.$qtdParams.' parametro(s)!');
+            }
 
             if (count($params) > 0) {
                 foreach ( $params as $key => $value ) {
@@ -173,6 +178,28 @@ class Router
             }
             return $this->request->getRoot().$pattern;
         }
+    }
+
+    /**
+    * Efetua um redirecionamento para um path, passando gets opcionais
+    * convertidos de array, como parametros
+    * @param string $routeName
+    * @param array $query
+    * @param array $params
+    */
+    public function redirectTo($routeName, $query = array(), $params = array())
+    {
+        $path = $this->pathFor($routeName, $params);
+
+        if (!is_array($query)) {
+            throw new \UnexpectedValueException('Router::redirectTo A query deve ser um array!');
+        }
+
+        if (count($query) > 0) {
+            $path = $path.'?'.http_build_query($query);
+        }
+        header("Location: ".$path);
+        die;
     }
 
     /**

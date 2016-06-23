@@ -119,11 +119,19 @@ class App
     */
     public function notFound(callable $fnc)
     {
-        if(is_callable($fnc)) {
+        if (is_callable($fnc)) {
             if ($fnc instanceof \Closure) {           
                 $this->notFoundModified = $fnc;
             }
         }
+    }
+
+    /**
+    * Retorna o path root via request
+    * @return string
+    */
+    public function root(){
+        return $this->request->getRoot();
     }
 
     /**
