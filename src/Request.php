@@ -47,14 +47,33 @@ class Request
                 } else {
                     parse_str($input_contents,$post_vars);
                 }
+                if (count($_GET) > 0) {
+                    $post_vars = array_merge($post_vars, $_GET);
+                }
                 return $post_vars;
             } else {
                 throw new \UnexpectedValueException('Content-type não aceito');
             }
         } elseif ($this->getMethod() == 'POST') {
+            if (count($_GET) > 0) {
+                $_POST = array_merge($_POST, $_GET);
+            }
+
             return $_POST;
         } elseif ($this->getMethod() == 'GET') {
             return $_GET;
+        }
+    }
+
+    /**
+    * Retorna o valor de um indice no corpo do request, caso exista!
+    * @param $key string
+    */
+    public function get($key)
+    {
+        $data = $this->getParsedBody();
+        if (isset($data[$key])) {
+            return $data[$key];
         }
     }
 
