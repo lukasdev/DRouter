@@ -43,6 +43,12 @@ class App
     */
     protected $notFoundModified = false;
 
+    /***
+    * Exceptions adicionais da App a serem lançadas!
+    * @var $addedExceptions array
+    */
+    protected $addedExceptions = array();
+
     public function __construct($paramsContainer = array())
     {
         $this->request = new Request();
@@ -84,8 +90,11 @@ class App
             $method = filter_var($exp[1], FILTER_SANITIZE_STRING);
             if (is_callable([$obj, $method])) {
                 return [$obj, $method];
-            } 
+            } else {
+                $this->addedExceptions['\InvalidArgumentException'] = 'Callable '.$obj.':'.$method.' inválido';
+            }
         }
+        $this->addedExceptions['\InvalidArgumentException'] = 'Callable inválido';
         return false;
     }
 
@@ -110,6 +119,8 @@ class App
         } elseif ($method == 'group' && count($args) == 2) {
             $callable = $this->validCallable($args[1]);
             $this->router->group($args[0], $callable);
+        } else {
+            $this->addedExceptions['\Exception'] = 'O metodo '.$method.' não existe';
         }
     }
 
@@ -117,12 +128,16 @@ class App
     * Define uma pagina notfoud
     * @param callable $fnc
     */
-    public function notFound(callable $fnc)
+    public function notFound($fnc)
     {
         if (is_callable($fnc)) {
             if ($fnc instanceof \Closure) {           
                 $this->notFoundModified = $fnc;
+            } else {
+                $this->addedExceptions['\InvalidArgumentException'] = 'O callable do metodo notFound deve ser um closure!';
             }
+        } else {
+            $this->addedExceptions['\InvalidArgumentException'] = 'App::notFound, callable invalido';
         }
     }
 
@@ -135,12 +150,25 @@ class App
     }
 
     /**
+    * Lança exceções adicionais do objeto App.
+    */
+    private function runAddedExceptions()
+    {
+        if (!empty($this->addedExceptions)) {
+            foreach ($this->addedExceptions as $exception => $message)
+                throw new $exception($message);
+                break;
+        }
+    }
+
+    /**
     * Da inicio a App. Executando as rotas criadas, renderizando uma pagina 404
     * ou exibindo a mensagem de uma exceção que tenha sido lançada
     */
     public function run()
     {
         try {
+            $this->runAddedExceptions();
 
             if ($this->router->dispatch()) {
                 $this->router->execute($this->container);
