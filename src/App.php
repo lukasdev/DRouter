@@ -155,9 +155,10 @@ class App
     private function runAddedExceptions()
     {
         if (!empty($this->addedExceptions)) {
-            foreach ($this->addedExceptions as $exception => $message)
+            foreach ($this->addedExceptions as $exception => $message){
                 throw new $exception($message);
                 break;
+            }
         }
     }
 
