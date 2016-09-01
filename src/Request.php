@@ -88,6 +88,11 @@ class Request
         } elseif (isset($_SERVER['PATH_INFO'])) {
             $pathInfo = $_SERVER['PATH_INFO'];
         }
+        
+        //correção para alguns hosts
+        if(isset($pathInfo)){
+            $pathInfo = str_replace('/index.php', '', $pathInfo);
+        }
 
         $rota = (!isset($pathInfo)) ? '/' : strip_tags(trim($pathInfo));
 
