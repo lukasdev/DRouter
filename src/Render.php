@@ -1,73 +1,76 @@
 <?php
-    namespace DRouter;
 
-    class Render
-    {
-        /**
-        * O caminho até a pasta de views
-        *@var $viewsFolder string
-        */
-        protected $viewsFolder;
+namespace DRouter;
+
+class Render
+{
+    /**
+     * O caminho até a pasta de views
+     * @var $viewsFolder string
+     */
+    protected $viewsFolder;
         
-        /**
-        * Array de variaveis globais as views!
-        * @var array $globals
-        */
-        protected $globals = array();
+    /**
+     * Array de variaveis globais as views!
+     * @var array $globals
+     */
+    protected $globals = array();
 
-        /**
-        * Define variaveis que serão globais para qualquer view
-        * no momento do extract
-        * @param array $data
-        */
-        public function setAsGlobal(array $data)
-        {
-            $glob = $this->getGlobals();
-            if (!empty($glob)) {
-                $data = array_merge($glob, $data);
-            }
-
-            $this->globals = $data;
+    /**
+     * Define variaveis que serão globais para qualquer view
+     * no momento do extract
+     * @param array $data
+     */
+    public function setAsGlobal(array $data)
+    {
+        $glob = $this->getGlobals();
+        if (!empty($glob)) {
+            $data = array_merge($glob, $data);
         }
 
-        /**
-        * Retorna o array de globais
-        * @return array
-        */
-        public function getGlobals()
-        {
-            return $this->globals;
-        }
-        /**
-        * Seta a pasta de viewss
-        *@param string $viewsFolder
-        */
-        public function setViewsFolder($viewsFolder)
-        {
-            $this->viewsFolder = $viewsFolder;
-        }
+        $this->globals = $data;
+    }
 
-        /**
-        * Carrega uma view e injeta valores
-        *@param string $fileName
-        *@param array $data
-        */
-        public function load($fileName, $data)
-        {
-            if (empty($this->viewsFolder)) {
-                throw new \Exception('A pasta de views não foi definida!');
-            }
+    /**
+     * Retorna o array de globais
+     * @return array
+     */
+    public function getGlobals()
+    {
+        return $this->globals;
+    }
+    
+    /**
+    * Seta a pasta de viewss
+    * @param string $viewsFolder
+    */
+    public function setViewsFolder($viewsFolder)
+    {
+        $this->viewsFolder = $viewsFolder;
+    }
 
-            $data = array_merge($data, $this->getGlobals());
-
-            extract($data);
-            if (file_exists($this->viewsFolder.$fileName)) {
-                include_once $this->viewsFolder.$fileName;
-            }
+    /**
+    * Carrega uma view e injeta valores
+    * @param string $fileName
+    * @param array $data
+    */
+    public function load($fileName, $data)
+    {
+        if (empty($this->viewsFolder)) {
+            throw new \Exception('A pasta de views não foi definida!');
         }
 
-        public function renderNotFoundPage(){
-            echo '<html>
+        $data = array_merge($data, $this->getGlobals());
+
+        extract($data);
+        if (file_exists($this->viewsFolder.$fileName)) {
+            include_once $this->viewsFolder.$fileName;
+        }
+    }
+
+    public function renderNotFoundPage()
+    {
+        echo '<html>
                 <head>
                     <meta charset=UTF-8>
                     <title>Pagina não encontrada</title>
@@ -94,6 +97,5 @@
                     <p>A pagina que você procura não está aqui, verifique a url!</p>
                 </body>
             </html>';
-
-        }
     }
+}

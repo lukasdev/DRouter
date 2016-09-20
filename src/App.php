@@ -1,4 +1,5 @@
 <?php
+
 /**
  * App
  *
@@ -14,39 +15,39 @@ namespace DRouter;
 class App
 {
     /**
-    * Objeto \DRouter\Router
-    *@var $router Router
-    */
+     * Objeto \DRouter\Router
+     * @var $router Router
+     */
     protected $router;
 
     /**
-    * Objeto \DRouter\Request
-    *@var $request Request
-    */
+     * Objeto \DRouter\Request
+     * @var $request Request
+     */
     protected $request;
 
     /**
-    * Objeto DRouter\Container
-    * @var $container Container
-    */
+     * Objeto DRouter\Container
+     * @var $container Container
+     */
     protected $container;
 
     /**
-    * Objeto \DRouter\Render
-    *@var $render Render
-    */
+     * Objeto \DRouter\Render
+     * @var $render Render
+     */
     public $render;
 
     /**
-    * Pagina notFound modificada
-    *@var $notFoundModified false|callable
-    */
+     * Pagina notFound modificada
+     * @var $notFoundModified false|callable
+     */
     protected $notFoundModified = false;
 
-    /***
-    * Exceptions adicionais da App a serem lançadas!
-    * @var $addedExceptions array
-    */
+    /**
+     * Exceptions adicionais da App a serem lançadas!
+     * @var $addedExceptions array
+     */
     protected $addedExceptions = array();
 
     public function __construct($paramsContainer = array())
@@ -61,46 +62,49 @@ class App
             'router' => $this->router
         ];
         $params = array_merge($paramsContainer, $content);
-        $this->container = new Container($params);        
+        $this->container = new Container($params);
     }
 
     /**
-    * @return \DRouter\Container
-    */
+     * @return \DRouter\Container
+     */
     public function getContainer()
     {
         return $this->container;
     }
 
     /**
-    * Recebe um callable e retorna sua referencia de acordo
-    * @return callable
-    */
+     * Recebe um callable e retorna sua referencia de acordo
+     * @return callable
+     */
     private function validCallable($callable)
     {
         if (is_callable($callable)) {
-            if ($callable instanceof \Closure){
+            if ($callable instanceof \Closure) {
                 $callable = $callable->bindTo($this->container);
             }
+
             return $callable;
-        } elseif (is_string($callable) && count(explode(':', $callable)) == 2){
+        } elseif (is_string($callable) && count(explode(':', $callable)) == 2) {
             $exp = explode(':', $callable);
             $obj = filter_var($exp[0], FILTER_SANITIZE_STRING);
             $obj = new $obj($this->container);
             $method = filter_var($exp[1], FILTER_SANITIZE_STRING);
+            
             if (is_callable([$obj, $method])) {
                 return [$obj, $method];
             } else {
                 $this->addedExceptions['\InvalidArgumentException'] = 'Callable '.$obj.':'.$method.' inválido';
             }
         }
+
         $this->addedExceptions['\InvalidArgumentException'] = 'Callable inválido';
         return false;
     }
 
     /**
-    * Emula metodos get, post, put, delete e group do objeto Router
-    */
+     * Emula metodos get, post, put, delete e group do objeto Router
+     */
     public function __call($method, $args)
     {
         $methodUpper = strtoupper($method);
@@ -109,7 +113,7 @@ class App
         if (in_array($methodUpper, $accepted)) {
             if (count($args) == 3) {
                 $conditions = $args[2];
-            } elseif(count($args) == 2) {
+            } elseif (count($args) == 2) {
                 $conditions = array();
             }
 
@@ -125,13 +129,13 @@ class App
     }
 
     /**
-    * Define uma pagina notfoud
-    * @param callable $fnc
-    */
+     * Define uma pagina notfoud
+     * @param callable $fnc
+     */
     public function notFound($fnc)
     {
         if (is_callable($fnc)) {
-            if ($fnc instanceof \Closure) {           
+            if ($fnc instanceof \Closure) {
                 $this->notFoundModified = $fnc;
             } else {
                 $this->addedExceptions['\InvalidArgumentException'] = 'O callable do metodo notFound deve ser um closure!';
@@ -142,20 +146,21 @@ class App
     }
 
     /**
-    * Retorna o path root via request
-    * @return string
-    */
-    public function root(){
+     * Retorna o path root via request
+     * @return string
+     */
+    public function root()
+    {
         return $this->request->getRoot();
     }
 
     /**
-    * Lança exceções adicionais do objeto App.
-    */
+     * Lança exceções adicionais do objeto App.
+     */
     private function runAddedExceptions()
     {
         if (!empty($this->addedExceptions)) {
-            foreach ($this->addedExceptions as $exception => $message){
+            foreach ($this->addedExceptions as $exception => $message) {
                 throw new $exception($message);
                 break;
             }
@@ -163,9 +168,9 @@ class App
     }
 
     /**
-    * Da inicio a App. Executando as rotas criadas, renderizando uma pagina 404
-    * ou exibindo a mensagem de uma exceção que tenha sido lançada
-    */
+     * Da inicio a App. Executando as rotas criadas, renderizando uma pagina 404
+     * ou exibindo a mensagem de uma exceção que tenha sido lançada
+     */
     public function run()
     {
         try {
@@ -176,12 +181,11 @@ class App
             } else {
                 if ($this->notFoundModified) {
                     $fnc = $this->notFoundModified->bindTo($this->container);
-                    $fnc();                
+                    $fnc();
                 } else {
                     $this->render->renderNotFoundPage();
                 }
             }
-
         } catch (\Exception $e) {
             echo $e->getMessage();
         }

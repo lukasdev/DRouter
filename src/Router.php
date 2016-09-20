@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Router
  * Objeto responsavel por definir e despachar rotas sob uma determinada url
@@ -10,7 +11,6 @@
  *
  * MIT LICENSE
  */
-
 namespace DRouter;
 
 use DRouter\Request;
@@ -19,9 +19,9 @@ use DRouter\Route;
 class Router
 {
     /**
-    * Array que define os metodos aceitos e guarda suas respectivas rotas
-    * @var $routes array
-    */
+     * Array que define os metodos aceitos e guarda suas respectivas rotas
+     * @var $routes array
+     */
     protected $routes = array(
         'GET' => array(),
         'POST' => array(),
@@ -30,33 +30,33 @@ class Router
     );
 
     /**
-    * Objeto DRouter\Request
-    * @var $request Request
-    */
+     * Objeto DRouter\Request
+     * @var $request Request
+     */
     protected $request;
 
     /**
-    * Objeto DRouter\Route - Rota a ser despachada
-    * @var $machedRoute Route
-    */
+     * Objeto DRouter\Route - Rota a ser despachada
+     * @var $machedRoute Route
+     */
     protected $matchedRoute;
 
     /**
-    * Prefixo do grupo de rota
-    * @var $routePrefix null|string
-    */
+     * Prefixo do grupo de rota
+     * @var $routePrefix null|string
+     */
     protected $routePrefix = null;
 
     /**
-    * Array de nomenclatura de rotas no formato [METHOD:index] = name
-    * @var $routeNames array
-    */
+     * Array de nomenclatura de rotas no formato [METHOD:index] = name
+     * @var $routeNames array
+     */
     protected $routeNames = array();
 
     /**
-    * Ultimo metodo utilizado em uma rota
-    * @var $lastRouteMethod null|string
-    */
+     * Ultimo metodo utilizado em uma rota
+     * @var $lastRouteMethod null|string
+     */
     protected $lastRouteMethod = null;
 
     public function __construct(Request $request)
@@ -65,25 +65,26 @@ class Router
     }
 
     /**
-    * Valida os paths das rotas, retirando a ultima barra caso exista
-    * para evitar conflitos no dispatch
-    * @param $path string
-    */
-    private function validatePath($path){
+     * Valida os paths das rotas, retirando a ultima barra caso exista
+     * para evitar conflitos no dispatch
+     * @param $path string
+     */
+    private function validatePath($path)
+    {
         $last = strlen($path)-1;
         if ($path[$last] == '/') {
-            $path = substr($path,0,-1);
+            $path = substr($path, 0, -1);
         }
         return $path;
     }
 
     /**
-    * Define uma rota sob um metodo criando sua representação no objeto Route
-    * @param $method string
-    * @param $pattern string
-    * @param $callable callable
-    * @param $conditions null|array
-    */
+     * Define uma rota sob um metodo criando sua representação no objeto Route
+     * @param $method string
+     * @param $pattern string
+     * @param $callable callable
+     * @param $conditions null|array
+     */
     public function route($method, $pattern, $callable, $conditions)
     {
         $method = strtoupper($method);
@@ -98,10 +99,10 @@ class Router
     }
 
     /**
-    * Define o prefixo para agrupamento das rotas
-    * @param $prefix string
-    * @param $fnc callable Closure
-    */
+     * Define o prefixo para agrupamento das rotas
+     * @param $prefix string
+     * @param $fnc callable Closure
+     */
     public function group($prefix, $fnc)
     {
         $this->routePrefix = $prefix;
@@ -114,9 +115,9 @@ class Router
     }
 
     /**
-    * Define o nome de uma rota recem criada
-    * @param $routeName string
-    */
+     * Define o nome de uma rota recem criada
+     * @param $routeName string
+     */
     public function setName($routeName)
     {
         $lastMethod = $this->lastRouteMethod;
@@ -126,10 +127,10 @@ class Router
     }
 
     /**
-    * Encontra uma rota pelo seu nome dentro do array de rotas
-    * @param $routeName string
-    * @return DRouter\Route
-    */
+     * Encontra uma rota pelo seu nome dentro do array de rotas
+     * @param $routeName string
+     * @return DRouter\Route
+     */
     protected function getRoute($routeName)
     {
         $routeIndex = array_search($routeName, $this->routeNames);
@@ -144,10 +145,10 @@ class Router
     }
 
     /**
-    * Retorna o callable de uma rota pelo seu nome
-    * @param $routeName
-    * @return callable
-    */
+     * Retorna o callable de uma rota pelo seu nome
+     * @param $routeName
+     * @return callable
+     */
     public function getRouteCallable($routeName)
     {
         $route = $this->getRoute($routeName);
@@ -155,15 +156,15 @@ class Router
     }
 
     /**
-    * Retorna o path até uma rota nomeada, trocando seus parametros
-    * caso necessário
-    * @param $routeName string
-    * @param $params array
-    * @return string
-    */
+     * Retorna o path até uma rota nomeada, trocando seus parametros
+     * caso necessário
+     * @param $routeName string
+     * @param $params array
+     * @return string
+     */
     public function pathFor($routeName, $params = array())
     {
-        if ($rota = $this->getRoute($routeName)){
+        if ($rota = $this->getRoute($routeName)) {
             $pattern = $rota->getPattern();
             $qtdParams = count($rota->getParamNames());
             
@@ -172,7 +173,7 @@ class Router
             }
 
             if (count($params) > 0) {
-                foreach ( $params as $key => $value ) {
+                foreach ($params as $key => $value) {
                     $pattern = str_replace(':'.$key, $value, $pattern);
                 }
             }
@@ -181,12 +182,12 @@ class Router
     }
 
     /**
-    * Efetua um redirecionamento para um path, passando gets opcionais
-    * convertidos de array, como parametros
-    * @param string $routeName
-    * @param array $query
-    * @param array $params
-    */
+     * Efetua um redirecionamento para um path, passando gets opcionais
+     * convertidos de array, como parametros
+     * @param string $routeName
+     * @param array $query
+     * @param array $params
+     */
     public function redirectTo($routeName, $query = array(), $params = array())
     {
         $path = $this->pathFor($routeName, $params);
@@ -203,19 +204,19 @@ class Router
     }
 
     /**
-    * Retorna array com tipos de requests aceitos pelo roteamento
-    * @return array
-    */
+     * Retorna array com tipos de requests aceitos pelo roteamento
+     * @return array
+     */
     public function getRequestAccepted()
     {
         return array_keys($this->routes);
     }
 
     /**
-    * Pelo request method atual, navega pelas rotas definidas
-    * E encontra a rota que coincidir com o padrão do RequestUri atual
-    * @return bolean
-    */
+     * Pelo request method atual, navega pelas rotas definidas
+     * E encontra a rota que coincidir com o padrão do RequestUri atual
+     * @return bolean
+     */
     public function dispatch()
     {
         foreach ($this->routes[$this->request->getMethod()] as $rota) {
@@ -232,25 +233,26 @@ class Router
     }
 
     /**
-    * Retorna a rota que coincidiu com a RequestUri atual
-    * @return DRouter\Route
-    */
+     * Retorna a rota que coincidiu com a RequestUri atual
+     * @return DRouter\Route
+     */
     public function getMatchedRoute()
     {
         return $this->matchedRoute;
     }
 
     /**
-    * Executa callable da rota que coincidiu
-    * passando como ultimo prametro o objeto container, caso necessário
-    * @param $container DRouter\Container
-    */
-    public function execute(\Drouter\Container $container) {
+     * Executa callable da rota que coincidiu
+     * passando como ultimo prametro o objeto container, caso necessário
+     * @param $container DRouter\Container
+     */
+    public function execute(\Drouter\Container $container)
+    {
         $rota = $this->getMatchedRoute();
         $callable = $rota->getCallable();
         $params = $rota->getParams();
 
-        if(!empty($params)) {
+        if (!empty($params)) {
             $params = array_values($params);
         }
 
