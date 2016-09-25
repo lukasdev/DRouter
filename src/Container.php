@@ -71,4 +71,21 @@ class Container
             }
         }
     }
+
+    /***
+    * Cria instancias compartilhadas dentro do container,
+    * Persistindo o retorno de um dado closure ao longo de sua execução.
+    */
+    public function shared(\Closure $callable) 
+    {
+        return function () use ($callable) {
+            static $object;
+
+            if (is_null($object)) {
+                $object = $callable();
+            }
+
+            return $object;
+        };
+    }
 }
