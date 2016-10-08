@@ -15,7 +15,26 @@ class Render
      * @var array $globals
      */
     protected $globals = array();
+    /**
+    * Array que define header e footer para o template
+    * @var array $hf [headerfooter]
+    */
 
+    protected $hf = [
+        'header' => '', 
+        'footer' => ''
+    ];
+
+    /**
+    * Define qual o arquivo de header e qual o arquivo de footer do template
+    * @param string $header
+    * @param string $footer
+    */
+    public function setHf($header, $footer){
+        $this->hf['header'] = $header;
+        $this->hf['footer'] = $footer;
+    }
+    
     /**
      * Define variaveis que serão globais para qualquer view
      * no momento do extract
@@ -49,12 +68,13 @@ class Render
         $this->viewsFolder = $viewsFolder;
     }
 
+
     /**
     * Carrega uma view e injeta valores
     * @param string $fileName
     * @param array $data
     */
-    public function load($fileName, $data)
+    public function load($fileName, $data, $hf = true)
     {
         if (empty($this->viewsFolder)) {
             throw new \Exception('A pasta de views não foi definida!');
@@ -63,8 +83,17 @@ class Render
         $data = array_merge($data, $this->getGlobals());
 
         extract($data);
+        
         if (file_exists($this->viewsFolder.$fileName)) {
+            if ($hf === true && $this->hf['header'] != '') {
+                include_once $this->viewsFolder.$this->hf['header'];
+            }
+
             include_once $this->viewsFolder.$fileName;
+
+            if ($hf === true && $this->hf['footer'] != '') {
+                include_once $this->viewsFolder.$this->hf['footer'];
+            }
         }
     }
 
