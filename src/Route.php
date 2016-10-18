@@ -16,6 +16,11 @@ namespace DRouter;
 class Route
 {
     /**
+    * String com o nome da rota em questão para uso futuro na aplicação
+    * @var $name string
+    */
+    protected $name;
+    /**
      * String com o padrão da rota, exemplo /user/:id
      * @var $pattern string
      */
@@ -47,6 +52,21 @@ class Route
         $this->pattern = $pattern;
         $this->callable = $callable;
         $this->conditions = $conditions;
+    }
+
+    /**
+    * Configura o nome da rota em questão
+    * @var $name string
+    */
+    public function setName($name){
+        $this->name = $name;
+    }
+
+    /**
+    * Retorna o nome da rota em questão
+    */
+    public function getName(){
+        return $this->name;
     }
 
     /**

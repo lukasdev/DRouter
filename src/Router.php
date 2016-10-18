@@ -124,6 +124,10 @@ class Router
         $lastIndex = count($this->routes[$lastMethod])-1;
         $indexName = $lastMethod.':'.$lastIndex;
         $this->routeNames[$indexName] = $routeName;
+
+        $rota = $this->routes[$lastMethod][$lastIndex];
+        $rota->setName($routeName);
+        $this->routes[$lastMethod][$lastIndex] = $rota;
     }
 
     /**
