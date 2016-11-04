@@ -256,6 +256,20 @@ class Router
         $callable = $rota->getCallable();
         $params = $rota->getParams();
 
+        
+
+        if (is_string($callable) && preg_match('/^[a-zA-Z\d\\\\]+[\:][\w\d]+$/', $callable)) {
+            $exp = explode(':', $callable);
+
+            $obj = filter_var($exp[0], FILTER_SANITIZE_STRING);
+            $obj = new $obj($container);
+            $method = filter_var($exp[1], FILTER_SANITIZE_STRING);
+
+            $callable = [$obj, $method];
+        }
+
+            
+
         if (!empty($params)) {
             $params = array_values($params);
         }

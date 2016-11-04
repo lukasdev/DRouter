@@ -86,16 +86,7 @@ class App
 
             return $callable;
         } elseif (is_string($callable) && count(explode(':', $callable)) == 2) {
-            $exp = explode(':', $callable);
-            $obj = filter_var($exp[0], FILTER_SANITIZE_STRING);
-            $obj = new $obj($this->container);
-            $method = filter_var($exp[1], FILTER_SANITIZE_STRING);
-            
-            if (is_callable([$obj, $method])) {
-                return [$obj, $method];
-            } else {
-                $this->addedExceptions['\InvalidArgumentException'] = 'Callable '.$obj.':'.$method.' inválido';
-            }
+            return $callable;
         }
 
         $this->addedExceptions['\InvalidArgumentException'] = 'Callable inválido';
