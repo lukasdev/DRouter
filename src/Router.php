@@ -203,6 +203,7 @@ class Router
         if (count($query) > 0) {
             $path = $path.'?'.http_build_query($query);
         }
+        $path = ($path == '') ? '/' :  $path;
         header("Location: ".$path);
         die;
     }
