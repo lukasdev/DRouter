@@ -59,6 +59,12 @@ class Router
      */
     protected $lastRouteMethod = null;
 
+    /**
+    * Rotas candidatas a serem despachadas
+    * @var $candidateRoutes array
+    */
+    protected $candidateRoutes = [];
+
     public function __construct(Request $request)
     {
         $this->request = $request;
@@ -220,21 +226,70 @@ class Router
     /**
      * Pelo request method atual, navega pelas rotas definidas
      * E encontra a rota que coincidir com o padrão do RequestUri atual
+     * Guardando-a no array de rotas candidatas
      * @return bolean
      */
     public function dispatch()
     {
+        $requestUri = $this->validatePath($this->request->getRequestUri());
+
         foreach ($this->routes[$this->request->getMethod()] as $rota) {
-            $requestUri = $this->validatePath($this->request->getRequestUri());
-            
             if ($rota->match($requestUri)) {
-                $this->matchedRoute = $rota;
-                return true;
-                break;
+                $this->candidateRoutes[] = $rota;
             }
         }
 
+        if (count($this->candidateRoutes) > 0) {
+            $this->dispatchCandidateRoutes($requestUri);
+            return true;
+        }
         return false;
+    }
+
+    /**
+    * Retorno o que não for variavel de uma pattern, exemplo: /categoria/:slug
+    * Nestecaso :slug é umavariavel, e eu retornarei "categoria"
+    * @param $pattern string
+    */
+    public function getNonVariables($pattern) {
+        $exp = explode('/',$pattern);
+        $retorno = [];
+        foreach($exp as $i => $v) {
+            if(!preg_match('/^[\:]/i', $v)) {
+                $retorno[$i] = $v;
+            }
+        }
+
+        return $retorno;
+    }
+
+    /**
+    * Determina qual rota deve ser despachada, com base em sua similaridade com
+    * a request URI,para evitar conflitos entre rotas parecidas.
+    * @param $requestUri string
+    */
+    public function dispatchCandidateRoutes($requestUri) {
+        $expUri = explode('/',$requestUri);
+        $similaridades = [];
+
+        foreach ($this->candidateRoutes as $n => $rota) {
+            $padrao = $rota->getPattern();
+            $naoVariaveis = $this->getNonVariables($padrao);
+
+            foreach ($naoVariaveis as $i => $valor) {
+                if(!isset($similaridades[$n]))
+                    $similaridades[$n] = 0;
+
+                if (isset($expUri[$i]) && $expUri[$i] == $valor) {
+                    $similaridades[$n] += 1;
+                }
+            }
+        }
+
+        $bigger = max(array_values($similaridades));
+        $mostSimilar = array_search($bigger, $similaridades);
+        $this->matchedRoute = $this->candidateRoutes[$mostSimilar];
+        $this->candidateRoutes = [];
     }
 
     /**
