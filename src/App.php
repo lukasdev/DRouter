@@ -27,6 +27,12 @@ class App
     protected $request;
 
     /**
+     * Objeto \DRouter\Response
+     * @var $request Response
+     */
+    protected $response;
+
+    /**
      * Objeto DRouter\Container
      * @var $container Container
      */
@@ -53,11 +59,13 @@ class App
     public function __construct($paramsContainer = array())
     {
         $this->request = new Request();
+        $this->response = new Response();
         $this->render = new Render();
         $this->router = new Router($this->request);
 
         $content = [
             'request' => $this->request,
+            'response' => $this->response,
             'render' => $this->render,
             'router' => $this->router
         ];
@@ -156,6 +164,13 @@ class App
                 break;
             }
         }
+    }
+
+
+    public function add(array $routesNames, $middleware)
+    {
+        #func_get_args());
+        $this->router->add($routesNames, $middleware);
     }
 
     /**
