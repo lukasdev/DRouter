@@ -166,13 +166,6 @@ class App
         }
     }
 
-
-    public function add(array $routesNames, $middleware)
-    {
-        #func_get_args());
-        $this->router->add($routesNames, $middleware);
-    }
-
     /**
      * Da inicio a App. Executando as rotas criadas, renderizando uma pagina 404
      * ou exibindo a mensagem de uma exceção que tenha sido lançada

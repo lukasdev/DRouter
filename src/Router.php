@@ -65,49 +65,10 @@ class Router
     */
     protected $candidateRoutes = [];
 
-    /**
-    * Objetos callables dos middlewares a serem consequentemente
-    * Atribuidos a rotas
-    * @var $middlewares array
-    */
-    protected $middlewares = [];
-
-
-    /**
-    * Referencia do container da aplicação
-    * @var $container \Drouter\Container
-    */
-    protected $container;
 
     public function __construct(Request $request)
     {
         $this->request = $request;
-    }
-
-    public function add()
-    {
-        $args = func_get_args();
-
-        if (count($args) > 1) {
-            //Atribuir um middlewares a N rotas
-            list($routeNames, $middleware) = $args;
-            foreach ($routeNames as $routeName) {
-                $this->middlewares[$routeName] = $middleware;
-            }
-        } else if(count($args) == 1) {
-            //Atribuir o middleware a ultima rota determinada
-            list($middleware) = $args;
-
-            $routeNames = $this->routeNames;
-            $lastRouteName = array_pop($routeNames);
-            $this->middlewares[$lastRouteName] = $middleware;
-        }
-    }
-
-
-    public function getMiddlewares()
-    {
-        return $this->middlewares;
     }
 
     /**
@@ -343,22 +304,6 @@ class Router
         return $this->matchedRoute;
     }
 
-
-    private function formatCallable($callable)
-    {
-        if (is_string($callable) && preg_match('/^[a-zA-Z\d\\\\]+[\:][\w\d]+$/', $callable)) {
-            $exp = explode(':', $callable);
-
-            $obj = filter_var($exp[0], FILTER_SANITIZE_STRING);
-            $obj = new $obj($this->container);
-            $method = filter_var($exp[1], FILTER_SANITIZE_STRING);
-
-            $callable = [$obj, $method];
-        }
-
-        return $callable;
-    }
-
     /**
      * Executa callable da rota que coincidiu
      * passando como ultimo prametro o objeto container, caso necessário
@@ -369,12 +314,17 @@ class Router
         $rota = $this->getMatchedRoute();
         $callable = $rota->getCallable();
         $params = $rota->getParams();
-
-        $this->container = $container;
         
 
-        //aqui
-        $callable = $this->formatCallable($callable);
+        if (is_string($callable) && preg_match('/^[a-zA-Z\d\\\\]+[\:][\w\d]+$/', $callable)) {
+            $exp = explode(':', $callable);
+
+            $obj = filter_var($exp[0], FILTER_SANITIZE_STRING);
+            $obj = new $obj($container);
+            $method = filter_var($exp[1], FILTER_SANITIZE_STRING);
+
+            $callable = [$obj, $method];
+        }
             
 
         if (!empty($params)) {
@@ -382,23 +332,10 @@ class Router
         }
 
         if (is_object($callable) || (is_string($callable) && is_callable($callable))) {
-            $params[] = $this->container;
+            $params[] = $container;
         }
 
-        if (in_array($rota->getName(), array_keys($this->getMiddlewares()))) {
-            //Esta rota deve ser executada apos o middleware
-            $middleware = $this->getMiddlewares()[$rota->getName()];
-
-            $middlewareCallable = $this->formatCallable($middleware);
-            #$middlewareCallable($callable, $params);
-
-            call_user_func_array($middlewareCallable, [
-                $callable,
-                $params,
-                $this->container
-            ]);
-        } else {
-            call_user_func_array($callable, $params);
-        }
+        
+        call_user_func_array($callable, $params);
     }
 }
