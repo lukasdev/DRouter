@@ -163,6 +163,18 @@ class Router
             $lastRoute = $this->getLastRouteName();
 
             $this->middlewares[$lastRoute][] = $middleware;
+        } elseif(count($args) > 1) {
+            list($routeNames, $middlewares) = $args;
+
+            foreach ($routeNames as $routeName) {
+                if (isset($this->middlewares[$routeName])) {
+                    $currentMiddlewares = $this->middlewares[$routeName];
+                    $this->middlewares[$routeName] = array_merge($middlewares, $currentMiddlewares);
+                } else {
+                    $this->middlewares[$routeName] = $middlewares;
+                }
+            }
+
         }
 
         return $this;
@@ -361,7 +373,15 @@ class Router
 
         if (isset($middlewares[$rota->getName()])) {
             $routeMiddlewares = $middlewares[$rota->getname()];
+            if (isset($middlewares['*'])) {
+                //middlewaresGlobais
+                $middlewaresGlobais = $middlewares['*'];
+                $routeMiddlewares = array_merge($middlewaresGlobais, $routeMiddlewares);
+            }
             $this->executeMiddlewares($routeMiddlewares, $container);
+        } elseif($middlewares['*']){
+            $middlewaresGlobais = $middlewares['*'];
+            $this->executeMiddlewares($middlewaresGlobais, $container);
         }
 
         if (is_string($callable) && preg_match('/^[a-zA-Z\d\\\\]+[\:][\w\d]+$/', $callable)) {
