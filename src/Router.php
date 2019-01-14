@@ -350,13 +350,7 @@ class Router
         return $this->matchedRoute;
     }
 
-    public function executeMiddlewares($middlewares, &$container){
-        foreach ($middlewares as $middleware) {
-            $container->request = Middleware::call(new $middleware, function($res){
-                return $res;
-            }, $container->request, $container->response);
-        }
-    }
+    
 
     /**
      * Executa callable da rota que coincidiu
@@ -378,10 +372,10 @@ class Router
                 $middlewaresGlobais = $middlewares['*'];
                 $routeMiddlewares = array_merge($middlewaresGlobais, $routeMiddlewares);
             }
-            $this->executeMiddlewares($routeMiddlewares, $container);
-        } elseif($middlewares['*']){
+            Middleware::executeMiddlewares($routeMiddlewares, $container);
+        } elseif(isset($middlewares['*'])){
             $middlewaresGlobais = $middlewares['*'];
-            $this->executeMiddlewares($middlewaresGlobais, $container);
+            Middleware::executeMiddlewares($middlewaresGlobais, $container);
         }
 
         if (is_string($callable) && preg_match('/^[a-zA-Z\d\\\\]+[\:][\w\d]+$/', $callable)) {
