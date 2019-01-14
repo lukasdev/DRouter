@@ -12,6 +12,9 @@
  */
 namespace DRouter;
 
+use DRouter\Http\Request;
+use DRouter\Http\Response;
+
 class App
 {
     /**

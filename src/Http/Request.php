@@ -11,10 +11,12 @@
  *
  * MIT LICENSE
  */
-namespace DRouter;
+namespace DRouter\Http;
 
 class Request
 {
+    use HttpDataTrait;
+    
     /**
      * Retorna o metodo atual ou GET por padrão
      * @return string

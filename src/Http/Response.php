@@ -10,10 +10,12 @@
  *
  * MIT LICENSE
  */
-    namespace DRouter;
+    namespace DRouter\Http;
 
     class Response
     {
+        use HttpDataTrait;
+        
         protected static $messages = [
             //Informational 1xx
             100 => '100 Continue',

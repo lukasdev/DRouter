@@ -13,8 +13,9 @@
  */
 namespace DRouter;
 
-use DRouter\Request;
+use DRouter\Http\Request;
 use DRouter\Route;
+use DRouter\Middlewares\Middleware;
 
 class Router
 {
@@ -65,6 +66,11 @@ class Router
     */
     protected $candidateRoutes = [];
 
+    /**
+    * Array associativo de rotas a middlewares
+    * @var $middlewares array
+    */
+    protected $middlewares = [];
 
     public function __construct(Request $request)
     {
@@ -139,6 +145,34 @@ class Router
         return $this;
     }
 
+    public function getLastRouteName() {
+        $routeNames = $this->routeNames;
+        $last = array_pop($routeNames);
+
+        return $last;
+    }
+
+
+    public function add()
+    {
+        $args = func_get_args();
+
+        if (count($args) == 1) {
+            //adicionando um novo middleware a ultima rota
+            list($middleware) = $args;
+            $lastRoute = $this->getLastRouteName();
+
+            $this->middlewares[$lastRoute][] = $middleware;
+        }
+
+        return $this;
+    }
+
+
+    public function getMiddlewares()
+    {
+        return $this->middlewares;
+    }
     /**
      * Encontra uma rota pelo seu nome dentro do array de rotas
      * @param $routeName string
@@ -304,6 +338,14 @@ class Router
         return $this->matchedRoute;
     }
 
+    public function executeMiddlewares($middlewares, &$container){
+        foreach ($middlewares as $middleware) {
+            $container->request = Middleware::call(new $middleware, function($res){
+                return $res;
+            }, $container->request, $container->response);
+        }
+    }
+
     /**
      * Executa callable da rota que coincidiu
      * passando como ultimo prametro o objeto container, caso necessário
@@ -314,7 +356,13 @@ class Router
         $rota = $this->getMatchedRoute();
         $callable = $rota->getCallable();
         $params = $rota->getParams();
-        
+
+        $middlewares = $this->getMiddlewares();
+
+        if (isset($middlewares[$rota->getName()])) {
+            $routeMiddlewares = $middlewares[$rota->getname()];
+            $this->executeMiddlewares($routeMiddlewares, $container);
+        }
 
         if (is_string($callable) && preg_match('/^[a-zA-Z\d\\\\]+[\:][\w\d]+$/', $callable)) {
             $exp = explode(':', $callable);
@@ -335,7 +383,6 @@ class Router
             $params[] = $container;
         }
 
-        
         call_user_func_array($callable, $params);
     }
 }
