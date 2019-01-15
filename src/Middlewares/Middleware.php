@@ -14,9 +14,19 @@
                         $middleware = new $middleware();
                     }
 
-                    $container->request = self::call($middleware, function($res){
-                        return $res;
-                    }, $container->request, $container->response);
+                    try {
+                        if ($container->request instanceof \DRouter\Http\Request) {
+                            $container->request = self::call($middleware, function($request, $response){
+                                return $request;
+                            }, $container->request, $container->response);
+                        } else {
+                            throw new \Exception('Todo middleware deve retornar \DRouter\Http\Request');
+                            break;
+                        }
+                    } catch (\Exception $e) {
+                        echo 'Erro: '.$e->getMessage();
+                        die;
+                    }
                 }
             }
         }
