@@ -15,12 +15,12 @@
                     }
 
                     try {
-                        if ($container->request instanceof \DRouter\Http\Request) {
-                            $container->request = self::call($middleware, function($request, $response){
-                                return $request;
+                        if ($container->response instanceof \DRouter\Http\Response) {
+                            $container->response = self::call($middleware, function($request, $response){
+                                return $response;
                             }, $container->request, $container->response);
                         } else {
-                            throw new \Exception('Todo middleware deve retornar \DRouter\Http\Request');
+                            throw new \Exception('Todo middleware deve retornar \DRouter\Http\Response');
                             break;
                         }
                     } catch (\Exception $e) {
