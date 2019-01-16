@@ -15,7 +15,7 @@
         "email": "dev.lucassilva@gmail.com"
     },
     "require": {
-        "php": ">=5.4.0"
+        "php": ">=7.0.0"
     },
     "autoload": {
         "psr-4": {
