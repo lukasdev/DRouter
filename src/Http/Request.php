@@ -36,6 +36,22 @@ class Request
     }
 
     /**
+    * Retorna os dados "crus" da requisição http para ser tratado
+    * @return string
+    */
+    public function getRawData() {
+        return file_get_contents('php://input');
+    }
+
+    /**
+    * Retorna a coversão dos dados json do request em array
+    * @return array
+    */
+    public function getJsonRequest() {
+        return json_decode($this->getRawData(), true);
+    }
+
+    /**
      * Retorna o conteudo do request parseado para GET, POST, PUT e DELETE
      * ou lança uma exceção caso o tipo de content-type seja inválido
      * @return array
@@ -44,7 +60,8 @@ class Request
     {
         if (!in_array($this->getMethod(), ['GET', 'POST'])) {
             if ($this->getContentType() == 'application/x-www-form-urlencoded') {
-                $input_contents = file_get_contents("php://input");
+                $input_contents = $this->getRawData();
+                
                 if (function_exists('mb_parse_str')) {
                     mb_parse_str($input_contents, $post_vars);
                 } else {
