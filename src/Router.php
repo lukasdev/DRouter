@@ -72,6 +72,17 @@ class Router
     */
     protected $middlewares = [];
 
+
+    /**
+    * Array contendo group prefixes e seus respectivos middlewares
+    */
+    protected $groupMiddlewares = [];
+
+    /**
+    * Group atual em utilização na aplicação
+    */
+    protected $currentGroup = null;
+
     public function __construct(Request $request)
     {
         $this->request = $request;
@@ -100,13 +111,21 @@ class Router
      */
     public function route($method, $pattern, $callable, $conditions)
     {
+        //reseta currentGroups para rotas futuras não herdarem seus middlewares
+        $this->currentGroup = null;
+
         $method = strtoupper($method);
         $pattern = $this->validatePath($pattern);
         if (!is_null($this->routePrefix)) {
             $pattern = $this->routePrefix.$pattern;
         }
 
-        $this->routes[$method][] = new Route($pattern, $callable, $conditions);
+        $objRoute = new Route($pattern, $callable, $conditions);
+        if (!is_null($this->routePrefix)) {
+            $objRoute->setGroupPrefix($this->routePrefix);
+        }
+
+        $this->routes[$method][] = $objRoute;
         $this->lastRouteMethod = $method;
         return $this;
     }
@@ -125,6 +144,10 @@ class Router
             throw new \InvalidArgumentException('Callable do metodo group DEVE ser um Closure');
         }
         $this->routePrefix = null;
+        $this->groupMiddlewares[$prefix] = [];
+        $this->currentGroup = $prefix;
+
+        return $this;
     }
 
     /**
@@ -145,27 +168,47 @@ class Router
         return $this;
     }
 
-    public function getLastRouteName() {
-        $routeNames = $this->routeNames;
-        $last = array_pop($routeNames);
+    /**
+    * Encontra um objeto de uma rota por seu nome
+    */
+    public function findRouteByName($routeName) {
+        $routePath = array_search($routeName, $this->routeNames);
+        list($method, $index) = explode(':', $routePath);
 
-        return $last;
+        return $this->routes[$method][$index];
     }
 
+    /**
+    * Encontra o ultimo objeto de rota declarada idependente de seu name
+    */
+    private function findLastRoute()
+    {
+        $method = $this->lastRouteMethod;
+        $index = count($this->routes[$method])-1;
 
+        return $this->routes[$method][$index];
+    }
+
+    /**
+    * Adiciona middlewares sob varias circunstancias (rotas, globais, names e group)
+    */
     public function add()
     {
         $args = func_get_args();
 
         if (count($args) == 1) {
-            //adicionando um novo middleware a ultima rota
             list($middleware) = $args;
-            $lastRoute = $this->getLastRouteName();
+            if (!is_null($this->currentGroup)) {
+                //middlewares no group
+                $this->groupMiddlewares[$this->currentGroup][] = $middleware;
+            } else {
+                //middlewares na rota
+                $lastRoute = $this->findLastRoute();
+                $lastRoute->addMiddleware($middleware);
+            }
 
-            $this->middlewares[$lastRoute][] = $middleware;
         } elseif(count($args) > 1) {
             list($routeNames, $middlewares) = $args;
-
             foreach ($routeNames as $routeName) {
                 if (isset($this->middlewares[$routeName])) {
                     $currentMiddlewares = $this->middlewares[$routeName];
@@ -174,13 +217,14 @@ class Router
                     $this->middlewares[$routeName] = $middlewares;
                 }
             }
-
         }
-
         return $this;
     }
 
-
+    /**
+    * Retorna os middlewares globais para posterior chamada
+    * @return array
+    */
     public function getMiddlewares()
     {
         return $this->middlewares;
@@ -350,8 +394,19 @@ class Router
         return $this->matchedRoute;
     }
 
-    
+    /**
+    * Agrupa um array de middlewares com outro array de middlewares
+    * UTilizado para a junção de middlewares globais com middlewares de rota
+    * @param array $middlewares1
+    * @param array $middlewares2
+    * @return array
+    */
+    private function joinMiddlewares(array $middlewares1, array $middlewares2)
+    {
+        return array_merge($middlewares1, $middlewares2);
+    }
 
+    
     /**
      * Executa callable da rota que coincidiu
      * passando como ultimo prametro o objeto container, caso necessário
@@ -364,18 +419,33 @@ class Router
         $params = $rota->getParams();
 
         $middlewares = $this->getMiddlewares();
+        $routeName = $rota->getName();
+        $groupPrefix = $rota->getGroupPrefix();
 
-        if (isset($middlewares[$rota->getName()])) {
-            $routeMiddlewares = $middlewares[$rota->getname()];
-            if (isset($middlewares['*'])) {
-                //middlewaresGlobais
-                $middlewaresGlobais = $middlewares['*'];
-                $routeMiddlewares = array_merge($middlewaresGlobais, $routeMiddlewares);
-            }
-            Middleware::executeMiddlewares($routeMiddlewares, $container);
-        } elseif(isset($middlewares['*'])){
-            $middlewaresGlobais = $middlewares['*'];
-            Middleware::executeMiddlewares($middlewaresGlobais, $container);
+        //Middlewares de group
+        if (!is_null($groupPrefix) && isset($this->groupMiddlewares[$groupPrefix])) {
+            $middlewares1 = $this->groupMiddlewares[$groupPrefix];
+            $routeMiddlewares = $rota->getMiddlewares();
+            $rota->addMiddlewares($this->joinMiddlewares($middlewares1, $routeMiddlewares));
+        }
+
+        //Middlewares de routeNames armazenadas em memoria para adição posterior
+        if (isset($middlewares[$routeName])) {
+            $middlewares1 = $middlewares[$routeName];
+            $routeMiddlewares = $rota->getMiddlewares();
+            $rota->addMiddlewares($this->joinMiddlewares($middlewares1, $routeMiddlewares));
+            unset($this->middlewares[$routeName]);
+        }
+
+        //rotas globais acima das indicadas com name
+        if (isset($middlewares['*'])) {
+            $middlewares1 = $middlewares['*'];
+            $routeMiddlewares = $rota->getMiddlewares();
+            $rota->addMiddlewares($this->joinMiddlewares($middlewares1, $routeMiddlewares));
+        }
+
+        if (count($rota->getMiddlewares())) {
+            Middleware::executeMiddlewares($rota->getMiddlewares(), $container);
         }
 
         if (is_string($callable) && preg_match('/^[a-zA-Z\d\\\\]+[\:][\w\d]+$/', $callable)) {

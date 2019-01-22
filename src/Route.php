@@ -47,11 +47,64 @@ class Route
      */
     protected $params = array();
 
+    /**
+    * Array contendo todas as middleawres a serem executadas antes desta
+    * rota
+    * @var $middlewares array
+    */
+    private $middlewares = [];
+
+    /**
+    * Propriedade contendo caso exista, o prefixo de group dessa rota
+    * @var null | string
+    */
+    private $groupPrefix = null;
+
     public function __construct($pattern, $callable, array $conditions)
     {
         $this->pattern = $pattern;
         $this->callable = $callable;
         $this->conditions = $conditions;
+    }
+
+    /**
+    * Seta o prefixo de group da rota
+    */
+    public function setGroupPrefix($prefix)
+    {
+        $this->groupPrefix = $prefix;
+    }
+
+    /**
+    * Retorna o prefixo de group da rota
+    */
+    public function getGroupPrefix()
+    {
+        return $this->groupPrefix;
+    }
+
+    /**
+    * Adiciona um determinado middleware ao array de middlewares
+    */
+    public function addMiddleware($middleware)
+    {
+        $this->middlewares[] = $middleware;
+    }
+
+    /**
+    * Adiciona um conjunto de middlewares ao array de middlewares
+    */
+    public function addMiddlewares(array $middlewares)
+    {
+        $this->middlewares = $middlewares;
+    }
+
+    /**
+    * Retorna o array de middlewares
+    */
+    public function getMiddlewares()
+    {
+        return $this->middlewares;
     }
 
     /**

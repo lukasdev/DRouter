@@ -124,7 +124,7 @@ class App
             return $this->router->route($methodUpper, $args[0], $callable, $conditions);
         } elseif ($method == 'group' && count($args) == 2) {
             $callable = $this->validCallable($args[1]);
-            $this->router->group($args[0], $callable);
+            return $this->router->group($args[0], $callable);
         } else {
             $this->addedExceptions['\Exception'] = 'O metodo '.$method.' não existe';
         }
