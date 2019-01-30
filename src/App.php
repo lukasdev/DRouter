@@ -179,6 +179,9 @@ class App
      */
     public function run()
     {
+        /*echo '<pre>';
+        print_r($this->router->getRoutes());
+        die;*/
         try {
             $this->runAddedExceptions();
 

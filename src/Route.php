@@ -60,6 +60,8 @@ class Route
     */
     private $groupPrefix = null;
 
+    private $options = [];
+
     public function __construct($pattern, $callable, array $conditions)
     {
         $this->pattern = $pattern;
@@ -154,6 +156,11 @@ class Route
         preg_match_all('@:([\w]+)@', $this->pattern, $paramNames, PREG_PATTERN_ORDER);
         return $paramNames[0];
     }
+
+
+    public function getOptions() {
+        return $this->options;
+    }
     
     /**
      * Verifica se o padrão da rota coincide com o padrão escrito na
@@ -166,23 +173,44 @@ class Route
     {
         $paramNames = $this->getParamNames();
 
-        $patternAsRegex = preg_replace_callback('@:[\w]+@', [$this, 'convertToRegex'], $this->pattern);
-        if (substr($this->pattern, -1) === '/') {
-            $patternAsRegex = $patternAsRegex . '?';
-        }
-        $patternAsRegex = '@^' . $patternAsRegex . '$@';
+        $pattern =  $this->getPattern();
 
-        if (preg_match($patternAsRegex, $resourceUri, $paramValues)) {
-            array_shift($paramValues);
-            
-            if (count($paramValues) > 0) {
-                foreach ($paramNames as $index => $value) {
-                    $this->params[substr($value, 1)] = urldecode($paramValues[$index]);
+        if (preg_match('/\[:options\]/', $pattern)) {
+            $exp = explode('[:options]', $pattern);
+            $estatico = $exp[0];
+            $estaticoDinamico = explode($estatico, $resourceUri);
+            if (count($estaticoDinamico) == 2) {
+                $estaticoUrl = explode($estaticoDinamico[1], $resourceUri);
+                $estaticoUrl = $estaticoUrl[0];
+
+                if ($estaticoUrl == $estatico){
+                    //estou em uma rota dinamica valida
+                    $dinamico = $estaticoDinamico[1];
+                    $this->options = explode('/', $dinamico);
+                    return true;
                 }
+            } else {
+                return false;
             }
-            return true;
         } else {
-            return false;
+            $patternAsRegex = preg_replace_callback('@:[\w]+@', [$this, 'convertToRegex'], $this->pattern);
+            if (substr($this->pattern, -1) === '/') {
+                $patternAsRegex = $patternAsRegex . '?';
+            }
+            $patternAsRegex = '@^' . $patternAsRegex . '$@';
+
+            if (preg_match($patternAsRegex, $resourceUri, $paramValues)) {
+                array_shift($paramValues);
+                
+                if (count($paramValues) > 0) {
+                    foreach ($paramNames as $index => $value) {
+                        $this->params[substr($value, 1)] = urldecode($paramValues[$index]);
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 

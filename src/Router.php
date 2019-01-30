@@ -130,6 +130,11 @@ class Router
         return $this;
     }
 
+
+    public function getRoutes() {
+        return $this->routes;
+    }
+
     /**
      * Define o prefixo para agrupamento das rotas
      * @param $prefix string
@@ -334,6 +339,7 @@ class Router
 
         if (count($this->candidateRoutes) > 0) {
             $this->dispatchCandidateRoutes($requestUri);
+            
             return true;
         }
         return false;
@@ -365,8 +371,23 @@ class Router
         $expUri = explode('/',$requestUri);
         $similaridades = [];
 
+        if (count($this->candidateRoutes) > 1) {
+            foreach ($this->candidateRoutes as $n => $rota) {
+                $padrao = $rota->getPattern();
+                if (preg_match('/\[:options\]/', $padrao)) {
+                    unset($this->candidateRoutes[$n]);
+                }
+            }
+        }
+
         foreach ($this->candidateRoutes as $n => $rota) {
             $padrao = $rota->getPattern();
+            if (preg_match('/\[:options\]/', $padrao)) {
+                $this->matchedRoute = $rota;
+                $this->candidateRoutes = [];
+                return;
+            }
+
             $naoVariaveis = $this->getNonVariables($padrao);
 
             foreach ($naoVariaveis as $i => $valor) {
@@ -415,6 +436,7 @@ class Router
     public function execute(\Drouter\Container $container)
     {
         $rota = $this->getMatchedRoute();
+
         $callable = $rota->getCallable();
         $params = $rota->getParams();
 
@@ -462,6 +484,8 @@ class Router
         if (!empty($params)) {
             $params = array_values($params);
         }
+
+        $container->options = $rota->getOptions();
 
         if (is_object($callable) || (is_string($callable) && is_callable($callable))) {
             $params[] = $container;
