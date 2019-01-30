@@ -275,12 +275,17 @@ class Router
         if ($rota = $this->getRoute($routeName)) {
             $pattern = $rota->getPattern();
             $qtdParams = count($rota->getParamNames());
-            
+
+            $withOptions =  preg_match('/\[:options\]/', $pattern);
+
             if ($qtdParams > 0 && count($params) == 0) {
                 throw new \RuntimeException('A rota '.$routeName.' requer '.$qtdParams.' parametro(s)!');
             }
 
-            if (count($params) > 0) {
+            if ($withOptions && count($params) > 0) {
+                $pattern = str_replace('[:options]', '', $pattern);
+                $pattern .= implode('/', $params);
+            } elseif (count($params) > 0) {
                 foreach ($params as $key => $value) {
                     $pattern = str_replace(':'.$key, $value, $pattern);
                 }

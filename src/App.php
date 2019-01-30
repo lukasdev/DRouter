@@ -118,10 +118,13 @@ class App
             } elseif (count($args) == 2) {
                 $conditions = array();
             }
+            if ($args[0] == '/[:options]') {
+                $this->addedExceptions['\InvalidArgumentException'] = 'Route pattern /[:options] inválido';
+            } else {
+                $callable = $this->validCallable($args[1]);
 
-            $callable = $this->validCallable($args[1]);
-
-            return $this->router->route($methodUpper, $args[0], $callable, $conditions);
+                return $this->router->route($methodUpper, $args[0], $callable, $conditions);
+            }
         } elseif ($method == 'group' && count($args) == 2) {
             $callable = $this->validCallable($args[1]);
             return $this->router->group($args[0], $callable);
