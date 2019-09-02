@@ -10,7 +10,7 @@
         public static function executeMiddlewares($middlewares, &$container){
             foreach ($middlewares as $middleware) {
                 if (is_string($middleware) || is_object($middleware)) {
-                    if (is_string($middlewares)) {
+                    if (is_string($middleware)) {
                         $middleware = new $middleware();
                     }
 
