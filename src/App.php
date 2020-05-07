@@ -77,6 +77,13 @@ class App
     }
 
     /**
+     * @return \DRouter\Http\Request
+     */
+    public function getRequest()
+    {
+        return $this->request;
+    }
+    /**
      * @return \DRouter\Container
      */
     public function getContainer()

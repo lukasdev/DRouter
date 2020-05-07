@@ -120,6 +120,45 @@ class Request
     }
 
     /**
+     * Define a url default do site, para o caso de ignorar um prefixo inicial
+     * exemplo: site.com/v1, o v1 pode ser ignorado ao ser passado como parametro
+     * esta função nao aceita parametros dinamicos, ex: v1/:number
+     */
+    public function setDefaultPath($pattern = null){
+        if ($pattern) {
+            $pattern = rtrim($pattern, '/');
+            $pattern = ltrim($pattern, '/');
+
+            if (isset($_SERVER['ORIG_PATH_INFO'])) {
+                $uri = $_SERVER['ORIG_PATH_INFO'];
+                $uriRel = &$_SERVER['ORIG_PATH_INFO'];
+            } elseif (isset($_SERVER['PATH_INFO'])) {
+                $uri = $_SERVER['PATH_INFO'];
+                $uriRel = &$_SERVER['PATH_INFO'];
+            }
+            
+            $exp = array_values(array_filter(explode('/', $uri)));
+            $expPattern = array_values(array_filter(explode('/', $pattern)));
+            
+            foreach ($expPattern as $i => $key) {
+                if ($exp[$i] != $key) {
+                    $redirect = $this->getRoot().'/'.$pattern;
+                    header('Location: '.$redirect);
+                    die;
+                }
+            }
+
+            foreach ($expPattern as $i => $key) {
+                unset($exp[$i]);
+            }
+
+            $newUri = '/'.implode('/', $exp);
+            #echo $newUri;
+            $uriRel = $newUri;
+        }
+    }
+
+    /**
      * Retorna a base da aplicação, exemplo /projetos/aplicacao
      * caso a aplicaçao esteja em localhost/projetos/aplicacao
      */
