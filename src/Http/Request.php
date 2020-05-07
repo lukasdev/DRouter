@@ -146,9 +146,7 @@ class Request
                     header('Location: '.$redirect);
                     die;
                 }
-            }
-
-            foreach ($expPattern as $i => $key) {
+                
                 unset($exp[$i]);
             }
 
