@@ -128,7 +128,8 @@ class Request
         if ($pattern) {
             $pattern = rtrim($pattern, '/');
             $pattern = ltrim($pattern, '/');
-
+            
+            $uri = '';
             if (isset($_SERVER['ORIG_PATH_INFO'])) {
                 $uri = $_SERVER['ORIG_PATH_INFO'];
                 $uriRel = &$_SERVER['ORIG_PATH_INFO'];
