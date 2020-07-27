@@ -99,6 +99,7 @@ class Render
 
     public function renderNotFoundPage()
     {
+        header("HTTP/1.0 404 Not Found");
         echo '<html>
                 <head>
                     <meta charset=UTF-8>
