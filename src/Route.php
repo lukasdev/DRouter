@@ -11,14 +11,15 @@
  *
  * MIT LICENSE
  */
+
 namespace DRouter;
 
 class Route
 {
     /**
-    * String com o nome da rota em questão para uso futuro na aplicação
-    * @var $name string
-    */
+     * String com o nome da rota em questão para uso futuro na aplicação
+     * @var $name string
+     */
     protected $name;
     /**
      * String com o padrão da rota, exemplo /user/:id
@@ -48,16 +49,16 @@ class Route
     protected $params = array();
 
     /**
-    * Array contendo todas as middleawres a serem executadas antes desta
-    * rota
-    * @var $middlewares array
-    */
+     * Array contendo todas as middleawres a serem executadas antes desta
+     * rota
+     * @var $middlewares array
+     */
     private $middlewares = [];
 
     /**
-    * Propriedade contendo caso exista, o prefixo de group dessa rota
-    * @var null | string
-    */
+     * Propriedade contendo caso exista, o prefixo de group dessa rota
+     * @var null | string
+     */
     private $groupPrefix = null;
 
     private $options = [];
@@ -70,57 +71,59 @@ class Route
     }
 
     /**
-    * Seta o prefixo de group da rota
-    */
+     * Seta o prefixo de group da rota
+     */
     public function setGroupPrefix($prefix)
     {
         $this->groupPrefix = $prefix;
     }
 
     /**
-    * Retorna o prefixo de group da rota
-    */
+     * Retorna o prefixo de group da rota
+     */
     public function getGroupPrefix()
     {
         return $this->groupPrefix;
     }
 
     /**
-    * Adiciona um determinado middleware ao array de middlewares
-    */
+     * Adiciona um determinado middleware ao array de middlewares
+     */
     public function addMiddleware($middleware)
     {
         $this->middlewares[] = $middleware;
     }
 
     /**
-    * Adiciona um conjunto de middlewares ao array de middlewares
-    */
+     * Adiciona um conjunto de middlewares ao array de middlewares
+     */
     public function addMiddlewares(array $middlewares)
     {
         $this->middlewares = $middlewares;
     }
 
     /**
-    * Retorna o array de middlewares
-    */
+     * Retorna o array de middlewares
+     */
     public function getMiddlewares()
     {
         return $this->middlewares;
     }
 
     /**
-    * Configura o nome da rota em questão
-    * @var $name string
-    */
-    public function setName($name){
+     * Configura o nome da rota em questão
+     * @var $name string
+     */
+    public function setName($name)
+    {
         $this->name = $name;
     }
 
     /**
-    * Retorna o nome da rota em questão
-    */
-    public function getName(){
+     * Retorna o nome da rota em questão
+     */
+    public function getName()
+    {
         return $this->name;
     }
 
@@ -132,7 +135,7 @@ class Route
     {
         return $this->callable;
     }
-    
+
     /**
      * Retorna os parametros encontrados desta rota
      * @return array
@@ -158,10 +161,11 @@ class Route
     }
 
 
-    public function getOptions() {
+    public function getOptions()
+    {
         return $this->options;
     }
-    
+
     /**
      * Verifica se o padrão da rota coincide com o padrão escrito na
      * url da aplicação, e guarda os parametros encontrados sob suas
@@ -183,7 +187,7 @@ class Route
                 $estaticoUrl = explode($estaticoDinamico[1], $resourceUri);
                 $estaticoUrl = $estaticoUrl[0];
 
-                if ($estaticoUrl == $estatico){
+                if ($estaticoUrl == $estatico) {
                     //estou em uma rota dinamica valida
                     $dinamico = $estaticoDinamico[1];
                     $this->options = explode('/', $dinamico);
@@ -201,7 +205,7 @@ class Route
 
             if (preg_match($patternAsRegex, $resourceUri, $paramValues)) {
                 array_shift($paramValues);
-                
+
                 if (count($paramValues) > 0) {
                     foreach ($paramNames as $index => $value) {
                         $this->params[substr($value, 1)] = urldecode($paramValues[$index]);
