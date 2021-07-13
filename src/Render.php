@@ -9,32 +9,33 @@ class Render
      * @var $viewsFolder string
      */
     protected $viewsFolder;
-        
+
     /**
      * Array de variaveis globais as views!
      * @var array $globals
      */
     protected $globals = array();
     /**
-    * Array que define header e footer para o template
-    * @var array $hf [headerfooter]
-    */
+     * Array que define header e footer para o template
+     * @var array $hf [headerfooter]
+     */
 
     protected $hf = [
-        'header' => '', 
+        'header' => '',
         'footer' => ''
     ];
 
     /**
-    * Define qual o arquivo de header e qual o arquivo de footer do template
-    * @param string $header
-    * @param string $footer
-    */
-    public function setHf($header, $footer){
+     * Define qual o arquivo de header e qual o arquivo de footer do template
+     * @param string $header
+     * @param string $footer
+     */
+    public function setHf($header, $footer)
+    {
         $this->hf['header'] = $header;
         $this->hf['footer'] = $footer;
     }
-    
+
     /**
      * Define variaveis que serão globais para qualquer view
      * no momento do extract
@@ -58,11 +59,11 @@ class Render
     {
         return $this->globals;
     }
-    
+
     /**
-    * Seta a pasta de viewss
-    * @param string $viewsFolder
-    */
+     * Seta a pasta de viewss
+     * @param string $viewsFolder
+     */
     public function setViewsFolder($viewsFolder)
     {
         $this->viewsFolder = $viewsFolder;
@@ -70,10 +71,10 @@ class Render
 
 
     /**
-    * Carrega uma view e injeta valores
-    * @param string $fileName
-    * @param array $data
-    */
+     * Carrega uma view e injeta valores
+     * @param string $fileName
+     * @param array $data
+     */
     public function load($fileName, $data, $hf = true)
     {
         if (empty($this->viewsFolder)) {
@@ -83,16 +84,16 @@ class Render
         $data = array_merge($data, $this->getGlobals());
 
         extract($data);
-        
-        if (file_exists($this->viewsFolder.$fileName)) {
+
+        if (file_exists($this->viewsFolder . $fileName)) {
             if ($hf === true && $this->hf['header'] != '') {
-                include_once $this->viewsFolder.$this->hf['header'];
+                include_once $this->viewsFolder . $this->hf['header'];
             }
 
-            include_once $this->viewsFolder.$fileName;
+            include_once $this->viewsFolder . $fileName;
 
             if ($hf === true && $this->hf['footer'] != '') {
-                include_once $this->viewsFolder.$this->hf['footer'];
+                include_once $this->viewsFolder . $this->hf['footer'];
             }
         }
     }

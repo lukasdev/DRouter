@@ -11,6 +11,7 @@
  *
  * MIT LICENSE
  */
+
 namespace DRouter;
 
 use DRouter\Http\Request;
@@ -61,26 +62,26 @@ class Router
     protected $lastRouteMethod = null;
 
     /**
-    * Rotas candidatas a serem despachadas
-    * @var $candidateRoutes array
-    */
+     * Rotas candidatas a serem despachadas
+     * @var $candidateRoutes array
+     */
     protected $candidateRoutes = [];
 
     /**
-    * Array associativo de rotas a middlewares
-    * @var $middlewares array
-    */
+     * Array associativo de rotas a middlewares
+     * @var $middlewares array
+     */
     protected $middlewares = [];
 
 
     /**
-    * Array contendo group prefixes e seus respectivos middlewares
-    */
+     * Array contendo group prefixes e seus respectivos middlewares
+     */
     protected $groupMiddlewares = [];
 
     /**
-    * Group atual em utilização na aplicação
-    */
+     * Group atual em utilização na aplicação
+     */
     protected $currentGroup = null;
 
     public function __construct(Request $request)
@@ -95,7 +96,7 @@ class Router
      */
     private function validatePath($path)
     {
-        $last = strlen($path)-1;
+        $last = strlen($path) - 1;
         if ($path[$last] == '/') {
             $path = substr($path, 0, -1);
         }
@@ -117,7 +118,7 @@ class Router
         $method = strtoupper($method);
         $pattern = $this->validatePath($pattern);
         if (!is_null($this->routePrefix)) {
-            $pattern = $this->routePrefix.$pattern;
+            $pattern = $this->routePrefix . $pattern;
         }
 
         $objRoute = new Route($pattern, $callable, $conditions);
@@ -131,7 +132,8 @@ class Router
     }
 
 
-    public function getRoutes() {
+    public function getRoutes()
+    {
         return $this->routes;
     }
 
@@ -162,8 +164,8 @@ class Router
     public function setName($routeName)
     {
         $lastMethod = $this->lastRouteMethod;
-        $lastIndex = count($this->routes[$lastMethod])-1;
-        $indexName = $lastMethod.':'.$lastIndex;
+        $lastIndex = count($this->routes[$lastMethod]) - 1;
+        $indexName = $lastMethod . ':' . $lastIndex;
         $this->routeNames[$indexName] = $routeName;
 
         $rota = $this->routes[$lastMethod][$lastIndex];
@@ -174,9 +176,10 @@ class Router
     }
 
     /**
-    * Encontra um objeto de uma rota por seu nome
-    */
-    public function findRouteByName($routeName) {
+     * Encontra um objeto de uma rota por seu nome
+     */
+    public function findRouteByName($routeName)
+    {
         $routePath = array_search($routeName, $this->routeNames);
         list($method, $index) = explode(':', $routePath);
 
@@ -184,19 +187,19 @@ class Router
     }
 
     /**
-    * Encontra o ultimo objeto de rota declarada idependente de seu name
-    */
+     * Encontra o ultimo objeto de rota declarada idependente de seu name
+     */
     private function findLastRoute()
     {
         $method = $this->lastRouteMethod;
-        $index = count($this->routes[$method])-1;
+        $index = count($this->routes[$method]) - 1;
 
         return $this->routes[$method][$index];
     }
 
     /**
-    * Adiciona middlewares sob varias circunstancias (rotas, globais, names e group)
-    */
+     * Adiciona middlewares sob varias circunstancias (rotas, globais, names e group)
+     */
     public function add()
     {
         $args = func_get_args();
@@ -211,8 +214,7 @@ class Router
                 $lastRoute = $this->findLastRoute();
                 $lastRoute->addMiddleware($middleware);
             }
-
-        } elseif(count($args) > 1) {
+        } elseif (count($args) > 1) {
             list($routeNames, $middlewares) = $args;
             foreach ($routeNames as $routeName) {
                 if (isset($this->middlewares[$routeName])) {
@@ -227,9 +229,9 @@ class Router
     }
 
     /**
-    * Retorna os middlewares globais para posterior chamada
-    * @return array
-    */
+     * Retorna os middlewares globais para posterior chamada
+     * @return array
+     */
     public function getMiddlewares()
     {
         return $this->middlewares;
@@ -243,7 +245,7 @@ class Router
     {
         $routeIndex = array_search($routeName, $this->routeNames);
         if ($routeIndex == false) {
-            throw new \RuntimeException('Rota '.$routeName.' não encontada');
+            throw new \RuntimeException('Rota ' . $routeName . ' não encontada');
         } else {
             $split = explode(':', $routeIndex);
             $rota = $this->routes[$split[0]][$split[1]];
@@ -279,7 +281,7 @@ class Router
             $withOptions =  preg_match('/\[:options\]/', $pattern);
 
             if ($qtdParams > 0 && count($params) == 0) {
-                throw new \RuntimeException('A rota '.$routeName.' requer '.$qtdParams.' parametro(s)!');
+                throw new \RuntimeException('A rota ' . $routeName . ' requer ' . $qtdParams . ' parametro(s)!');
             }
 
             if ($withOptions && count($params) > 0) {
@@ -287,10 +289,10 @@ class Router
                 $pattern .= implode('/', $params);
             } elseif (count($params) > 0) {
                 foreach ($params as $key => $value) {
-                    $pattern = str_replace(':'.$key, $value, $pattern);
+                    $pattern = str_replace(':' . $key, $value, $pattern);
                 }
             }
-            return $this->request->getRoot().$pattern;
+            return $this->request->getRoot() . $pattern;
         }
     }
 
@@ -310,10 +312,10 @@ class Router
         }
 
         if (count($query) > 0) {
-            $path = $path.'?'.http_build_query($query);
+            $path = $path . '?' . http_build_query($query);
         }
         $path = ($path == '') ? '/' :  $path;
-        header("Location: ".$path);
+        header("Location: " . $path);
         die;
     }
 
@@ -344,22 +346,23 @@ class Router
 
         if (count($this->candidateRoutes) > 0) {
             $this->dispatchCandidateRoutes($requestUri);
-            
+
             return true;
         }
         return false;
     }
 
     /**
-    * Retorno o que não for variavel de uma pattern, exemplo: /categoria/:slug
-    * Nestecaso :slug é umavariavel, e eu retornarei "categoria"
-    * @param $pattern string
-    */
-    public function getNonVariables($pattern) {
-        $exp = explode('/',$pattern);
+     * Retorno o que não for variavel de uma pattern, exemplo: /categoria/:slug
+     * Nestecaso :slug é umavariavel, e eu retornarei "categoria"
+     * @param $pattern string
+     */
+    public function getNonVariables($pattern)
+    {
+        $exp = explode('/', $pattern);
         $retorno = [];
-        foreach($exp as $i => $v) {
-            if(!preg_match('/^[\:]/i', $v)) {
+        foreach ($exp as $i => $v) {
+            if (!preg_match('/^[\:]/i', $v)) {
                 $retorno[$i] = $v;
             }
         }
@@ -368,12 +371,13 @@ class Router
     }
 
     /**
-    * Determina qual rota deve ser despachada, com base em sua similaridade com
-    * a request URI,para evitar conflitos entre rotas parecidas.
-    * @param $requestUri string
-    */
-    public function dispatchCandidateRoutes($requestUri) {
-        $expUri = explode('/',$requestUri);
+     * Determina qual rota deve ser despachada, com base em sua similaridade com
+     * a request URI,para evitar conflitos entre rotas parecidas.
+     * @param $requestUri string
+     */
+    public function dispatchCandidateRoutes($requestUri)
+    {
+        $expUri = explode('/', $requestUri);
         $similaridades = [];
 
         if (count($this->candidateRoutes) > 1) {
@@ -396,7 +400,7 @@ class Router
             $naoVariaveis = $this->getNonVariables($padrao);
 
             foreach ($naoVariaveis as $i => $valor) {
-                if(!isset($similaridades[$n]))
+                if (!isset($similaridades[$n]))
                     $similaridades[$n] = 0;
 
                 if (isset($expUri[$i]) && $expUri[$i] == $valor) {
@@ -421,18 +425,18 @@ class Router
     }
 
     /**
-    * Agrupa um array de middlewares com outro array de middlewares
-    * UTilizado para a junção de middlewares globais com middlewares de rota
-    * @param array $middlewares1
-    * @param array $middlewares2
-    * @return array
-    */
+     * Agrupa um array de middlewares com outro array de middlewares
+     * UTilizado para a junção de middlewares globais com middlewares de rota
+     * @param array $middlewares1
+     * @param array $middlewares2
+     * @return array
+     */
     private function joinMiddlewares(array $middlewares1, array $middlewares2)
     {
         return array_merge($middlewares1, $middlewares2);
     }
 
-    
+
     /**
      * Executa callable da rota que coincidiu
      * passando como ultimo prametro o objeto container, caso necessário
@@ -484,7 +488,6 @@ class Router
 
             $callable = [$obj, $method];
         }
-            
 
         if (!empty($params)) {
             $params = array_values($params);

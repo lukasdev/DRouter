@@ -11,12 +11,13 @@
  *
  * MIT LICENSE
  */
+
 namespace DRouter\Http;
 
 class Request
 {
     use HttpDataTrait;
-    
+
     /**
      * Retorna o metodo atual ou GET por padrão
      * @return string
@@ -36,18 +37,20 @@ class Request
     }
 
     /**
-    * Retorna os dados "crus" da requisição http para ser tratado
-    * @return string
-    */
-    public function getRawData() {
+     * Retorna os dados "crus" da requisição http para ser tratado
+     * @return string
+     */
+    public function getRawData()
+    {
         return file_get_contents('php://input');
     }
 
     /**
-    * Retorna a coversão dos dados json do request em array
-    * @return array
-    */
-    public function getJsonRequest() {
+     * Retorna a coversão dos dados json do request em array
+     * @return array
+     */
+    public function getJsonRequest()
+    {
         return json_decode($this->getRawData(), true);
     }
 
@@ -61,7 +64,7 @@ class Request
         if (!in_array($this->getMethod(), ['GET', 'POST'])) {
             if ($this->getContentType() == 'application/x-www-form-urlencoded') {
                 $input_contents = $this->getRawData();
-                
+
                 if (function_exists('mb_parse_str')) {
                     mb_parse_str($input_contents, $post_vars);
                 } else {
@@ -108,7 +111,7 @@ class Request
         } elseif (isset($_SERVER['PATH_INFO'])) {
             $pathInfo = $_SERVER['PATH_INFO'];
         }
-        
+
         //correção para alguns hosts
         if (isset($pathInfo)) {
             $pathInfo = str_replace('/index.php', '', $pathInfo);
@@ -124,11 +127,12 @@ class Request
      * exemplo: site.com/v1, o v1 pode ser ignorado ao ser passado como parametro
      * esta função nao aceita parametros dinamicos, ex: v1/:number
      */
-    public function setDefaultPath($pattern = null){
+    public function setDefaultPath($pattern = null)
+    {
         if ($pattern) {
             $pattern = rtrim($pattern, '/');
             $pattern = ltrim($pattern, '/');
-            
+
             $uri = '';
             if (isset($_SERVER['ORIG_PATH_INFO'])) {
                 $uri = $_SERVER['ORIG_PATH_INFO'];
@@ -137,22 +141,21 @@ class Request
                 $uri = $_SERVER['PATH_INFO'];
                 $uriRel = &$_SERVER['PATH_INFO'];
             }
-            
+
             $exp = array_values(array_filter(explode('/', $uri)));
             $expPattern = array_values(array_filter(explode('/', $pattern)));
-            
+
             foreach ($expPattern as $i => $key) {
                 if ($exp[$i] != $key) {
-                    $redirect = $this->getRoot().'/'.$pattern;
-                    header('Location: '.$redirect);
+                    $redirect = $this->getRoot() . '/' . $pattern;
+                    header('Location: ' . $redirect);
                     die;
                 }
-                
+
                 unset($exp[$i]);
             }
 
-            $newUri = '/'.implode('/', $exp);
-            #echo $newUri;
+            $newUri = '/' . implode('/', $exp);
             $uriRel = $newUri;
         }
     }
