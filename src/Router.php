@@ -478,9 +478,9 @@ class Router
         if (is_string($callable) && preg_match('/^[a-zA-Z\d\\\\]+[\:][\w\d]+$/', $callable)) {
             $exp = explode(':', $callable);
 
-            $obj = filter_var($exp[0], FILTER_SANITIZE_STRING);
+            $obj = filter_var($exp[0], FILTER_UNSAFE_RAW);
             $obj = new $obj($container);
-            $method = filter_var($exp[1], FILTER_SANITIZE_STRING);
+            $method = filter_var($exp[1], FILTER_UNSAFE_RAW);
 
             $callable = [$obj, $method];
         }
