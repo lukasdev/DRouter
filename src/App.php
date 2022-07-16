@@ -10,6 +10,7 @@
  *
  * MIT LICENSE
  */
+
 namespace DRouter;
 
 use DRouter\Http\Request;
@@ -136,7 +137,7 @@ class App
             $callable = $this->validCallable($args[1]);
             return $this->router->group($args[0], $callable);
         } else {
-            $this->addedExceptions['\Exception'] = 'O metodo '.$method.' não existe';
+            $this->addedExceptions['\Exception'] = 'O metodo ' . $method . ' não existe';
         }
     }
 
@@ -180,7 +181,8 @@ class App
     }
 
 
-    public function add(array $routeNames, array $middewares){
+    public function add(array $routeNames, array $middewares)
+    {
         $this->router->add($routeNames, $middewares);
     }
     /**
@@ -189,9 +191,6 @@ class App
      */
     public function run()
     {
-        /*echo '<pre>';
-        print_r($this->router->getRoutes());
-        die;*/
         try {
             $this->runAddedExceptions();
 
